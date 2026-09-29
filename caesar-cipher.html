@@ -37,6 +37,12 @@ h2{font-family:var(--head);font-size:1.35rem;margin:0 0 6px}
 p{margin:0 0 10px}
 .lead{color:var(--muted);max-width:56ch;margin-bottom:26px}
 section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px}
+.about{margin-bottom:22px}
+.about ul{margin:0 0 10px;padding-left:1.2em}
+.about li{margin-bottom:4px}
+.stepbtn{width:44px;height:44px;font-size:1.3rem;padding:0;line-height:1}
+.rule{background:var(--bg);border-left:4px solid var(--accent);padding:10px 14px;border-radius:4px;margin:8px 0 16px;font-size:.98rem}
+.rule b{font-family:var(--mono)}
 .hint{color:var(--muted);font-size:.93rem}
 label{font-weight:600;display:block;margin-bottom:6px}
 textarea,input[type=text],select{
@@ -82,36 +88,51 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
 <main>
   <div class="top-actions"><button id="theme" type="button" aria-label="Toggle light or dark theme">Theme</button></div>
   <h1>Caesar Cipher Lab</h1>
-  <p class="lead">Pick a ciphertext, then try to break it two ways: guess the shift by hand, or let the letter counts point you to it.</p>
+  <div class="about">
+    <h2>What this is for</h2>
+    <p>A Caesar cipher hides a message by moving every letter the same number of places along the alphabet. That number is called the <strong>shift</strong>. This page lets you practise breaking the cipher, meaning you find the shift without being told it.</p>
+    <p>Use it in class to see two ways of doing that:</p>
+    <ul>
+      <li><strong>Guess and check:</strong> try shifts one at a time until the message makes sense (steps 1 and 3).</li>
+      <li><strong>Count letters:</strong> the most common letter in the message probably stands for E (step 2).</li>
+    </ul>
+    <p class="hint">Tip for teachers: let students work by hand first, then use the page to check their answers.</p>
+  </div>
 
   <section aria-labelledby="s1">
-    <h2 id="s1">1. Choose a ciphertext</h2>
-    <p class="hint">Challenges 1 to 3 use different shifts. You can also paste your own below.</p>
+    <h2 id="s1">1. Try a shift</h2>
+    <p>The message below was hidden with a secret shift. To decode it, move every letter <strong>back</strong> by the same number of places. Change the number until the result reads as English.</p>
+
+    <label>Pick a message</label>
     <div class="row" id="challenges"></div>
-    <label for="cipher">Ciphertext</label>
+
+    <label for="cipher">Hidden message (ciphertext)</label>
     <textarea id="cipher" spellcheck="false" autocapitalize="characters"></textarea>
     <div class="row">
       <button id="reveal" type="button">Show answer (teacher)</button>
     </div>
     <div class="answer" id="answer" hidden></div>
-  </section>
 
-  <section aria-labelledby="s2">
-    <h2 id="s2">2. Try a shift</h2>
-    <p class="hint">Slide the shift. Each ciphertext letter (top row) turns into the letter below it. Stop when the message reads as English.</p>
+    <label for="shift" style="margin-top:14px">Shift: how many places to move each letter back</label>
     <div class="shiftbar">
-      <label for="shift" style="margin:0">Shift</label>
+      <button id="dec" class="stepbtn" type="button" aria-label="Decrease shift">-</button>
       <input id="shift" type="range" min="0" max="25" value="0">
+      <button id="inc" class="stepbtn" type="button" aria-label="Increase shift">+</button>
       <span class="shiftnum" id="shiftnum">0</span>
     </div>
+    <div class="rule" id="rule" aria-live="polite"></div>
+
+    <label>Decoded result with this shift</label>
     <div class="out" id="decoded" aria-live="polite"></div>
-    <div class="scroll" style="margin-top:14px">
+
+    <p class="hint" style="margin-top:14px">Lookup chart: find a letter from the message in the top row. The letter under it is what it turns into.</p>
+    <div class="scroll">
       <div class="strip" id="strip" aria-hidden="true"></div>
     </div>
   </section>
 
   <section aria-labelledby="s3">
-    <h2 id="s3">3. Count the letters</h2>
+    <h2 id="s3">2. Count the letters</h2>
     <p class="hint">In English, E is the most common letter, then T and A. Longer messages follow this pattern more closely.</p>
     <div class="freq" id="freq" aria-hidden="true"></div>
     <label for="assume" style="margin-top:14px">Assume the most common ciphertext letter stands for</label>
@@ -126,7 +147,7 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
   </section>
 
   <section aria-labelledby="s4">
-    <h2 id="s4">4. Brute force check</h2>
+    <h2 id="s4">3. Check all 25 shifts</h2>
     <details>
       <summary>Show all 25 shifts at once</summary>
       <p class="hint">Click a row to load that shift. Best kept closed until students have tried by hand.</p>
@@ -138,7 +159,7 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
   </section>
 
   <section aria-labelledby="s5">
-    <h2 id="s5">5. Make a message for a partner</h2>
+    <h2 id="s5">4. Make a message for a partner</h2>
     <label for="plain">Your message</label>
     <input id="plain" type="text" value="MEET ME AFTER CLASS" autocomplete="off">
     <div class="shiftbar">
@@ -270,6 +291,19 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
   function update(){
     var k = Number(shift.value);
     $("shiftnum").textContent = k;
+    var r = $("rule");
+    if (k === 0){
+      r.textContent = "Shift 0: no letters move, so the text is unchanged.";
+    } else {
+      r.innerHTML = "";
+      var lead = document.createElement("span");
+      lead.textContent = "Shift " + k + ": move each letter back " + k + (k === 1 ? " place. " : " places. ");
+      var ex = document.createElement("span");
+      var parts = [];
+      for (var q = 0; q < 3; q++) parts.push(A[(k + q) % 26] + " becomes " + A[q]);
+      ex.textContent = "For example, " + parts.join(", ") + ". Letters at the start wrap around: A becomes " + A[26 - k] + ".";
+      r.appendChild(lead); r.appendChild(ex);
+    }
     $("decoded").textContent = shiftText(cipher.value, -k) || "Your decoded text appears here.";
     drawStrip(k);
     var n = counts(cipher.value);
@@ -280,6 +314,8 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
 
   cipher.addEventListener("input", function(){ current = null; update(); });
   shift.addEventListener("input", update);
+  $("dec").addEventListener("click", function(){ shift.value = Math.max(0, Number(shift.value) - 1); update(); });
+  $("inc").addEventListener("click", function(){ shift.value = Math.min(25, Number(shift.value) + 1); update(); });
   $("assume").addEventListener("change", update);
   $("useGuess").addEventListener("click", function(){ shift.value = guessShift; update(); });
 
