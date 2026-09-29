@@ -14,19 +14,10 @@
   --head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
   --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0E1626; --surface:#16223A; --ink:#E8EEF7; --muted:#9FB0C8; --line:#2B3A57;
-    --accent:#4FD1C5; --accent-ink:#0E1626; --hit:#F5B93A; --hit-ink:#14213D; --bar:#4A6086;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0E1626; --surface:#16223A; --ink:#E8EEF7; --muted:#9FB0C8; --line:#2B3A57;
-  --accent:#4FD1C5; --accent-ink:#0E1626; --hit:#F5B93A; --hit-ink:#14213D; --bar:#4A6086;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -79,14 +70,12 @@ tr.pick td{background:var(--hit);color:var(--hit-ink)}
 tr.click{cursor:pointer}
 details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
 .answer{font-family:var(--mono);margin-top:8px}
-.top-actions{display:flex;justify-content:flex-end;margin-bottom:6px}
 @media (max-width:520px){.freq .l{font-size:.6rem}.freq .n{display:none}}
 @media (prefers-reduced-motion: no-preference){.freq .bar{transition:height .2s}}
 </style>
 </head>
 <body>
 <main>
-  <div class="top-actions"><button id="theme" type="button" aria-label="Toggle light or dark theme">Theme</button></div>
   <h1>Caesar Cipher Lab</h1>
   <div class="about">
     <h2>What this is for</h2>
@@ -337,14 +326,6 @@ details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
     cipher.value = $("made").textContent; current = null; shift.value = 0;
     $("answer").hidden = true; update();
     window.scrollTo({top: 0, behavior: "smooth"});
-  });
-
-  // Theme toggle
-  $("theme").addEventListener("click", function(){
-    var r = document.documentElement;
-    var dark = r.getAttribute("data-theme") === "dark" ||
-      (!r.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    r.setAttribute("data-theme", dark ? "light" : "dark");
   });
 
   loadChallenge(challenges[0]);
