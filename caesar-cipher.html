@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caesar Cipher Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --ink:#14213D; --muted:#55657D; --line:#C9D4E3;
+  --accent:#0F766E; --accent-ink:#FFFFFF; --hit:#F2A900; --hit-ink:#14213D; --bar:#8FA3BF;
+  --head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1626; --surface:#16223A; --ink:#E8EEF7; --muted:#9FB0C8; --line:#2B3A57;
+    --accent:#4FD1C5; --accent-ink:#0E1626; --hit:#F5B93A; --hit-ink:#14213D; --bar:#4A6086;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1626; --surface:#16223A; --ink:#E8EEF7; --muted:#9FB0C8; --line:#2B3A57;
+  --accent:#4FD1C5; --accent-ink:#0E1626; --hit:#F5B93A; --hit-ink:#14213D; --bar:#4A6086;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;font-size:17px}
+main{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+h1{font-family:var(--head);font-size:clamp(2rem,6vw,3rem);line-height:1.05;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-family:var(--head);font-size:1.35rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--muted);max-width:56ch;margin-bottom:26px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px}
+.hint{color:var(--muted);font-size:.93rem}
+label{font-weight:600;display:block;margin-bottom:6px}
+textarea,input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:1rem;color:var(--ink);background:var(--bg);
+  border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+textarea{min-height:84px;resize:vertical;letter-spacing:.04em}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:hover{border-color:var(--accent)}
+:focus-visible{outline:3px solid var(--hit);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.out{font-family:var(--mono);font-size:1.15rem;letter-spacing:.06em;background:var(--bg);
+  border:1px dashed var(--line);border-radius:6px;padding:12px;min-height:3em;overflow-wrap:anywhere}
+.shiftbar{display:flex;align-items:center;gap:14px;margin:14px 0 6px}
+.shiftbar input{flex:1;accent-color:var(--accent)}
+.shiftnum{font-family:var(--mono);font-weight:700;font-size:1.6rem;min-width:2ch;text-align:right}
+.scroll{overflow-x:auto;padding-bottom:6px}
+.strip{display:grid;grid-template-columns:auto repeat(26,28px);gap:2px;font-family:var(--mono);font-size:.9rem;width:max-content}
+.strip .lab{font-family:var(--body);font-size:.8rem;color:var(--muted);align-self:center;padding-right:10px;white-space:nowrap}
+.strip .c{height:30px;display:grid;place-items:center;border:1px solid var(--line);border-radius:4px}
+.strip .c.b{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.freq{display:grid;grid-template-columns:repeat(26,1fr);gap:3px;align-items:end;height:150px;margin:12px 0 4px}
+.freq .col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;align-items:center;font-family:var(--mono);font-size:.7rem}
+.freq .bar{width:100%;background:var(--bar);border-radius:3px 3px 0 0;min-height:1px}
+.freq .col.top .bar{background:var(--hit)}
+.freq .n{color:var(--muted);height:1.1em}
+.freq .l{margin-top:3px}
+.callout{background:var(--bg);border-left:4px solid var(--hit);padding:10px 14px;border-radius:4px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.t{font-family:var(--mono);overflow-wrap:anywhere}
+tr.pick td{background:var(--hit);color:var(--hit-ink)}
+tr.click{cursor:pointer}
+details summary{cursor:pointer;font-weight:600;margin-bottom:10px}
+.answer{font-family:var(--mono);margin-top:8px}
+.top-actions{display:flex;justify-content:flex-end;margin-bottom:6px}
+@media (max-width:520px){.freq .l{font-size:.6rem}.freq .n{display:none}}
+@media (prefers-reduced-motion: no-preference){.freq .bar{transition:height .2s}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top-actions"><button id="theme" type="button" aria-label="Toggle light or dark theme">Theme</button></div>
+  <h1>Caesar Cipher Lab</h1>
+  <p class="lead">Pick a ciphertext, then try to break it two ways: guess the shift by hand, or let the letter counts point you to it.</p>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">1. Choose a ciphertext</h2>
+    <p class="hint">Challenges 1 to 3 use different shifts. You can also paste your own below.</p>
+    <div class="row" id="challenges"></div>
+    <label for="cipher">Ciphertext</label>
+    <textarea id="cipher" spellcheck="false" autocapitalize="characters"></textarea>
+    <div class="row">
+      <button id="reveal" type="button">Show answer (teacher)</button>
+    </div>
+    <div class="answer" id="answer" hidden></div>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2">2. Try a shift</h2>
+    <p class="hint">Slide the shift. Each ciphertext letter (top row) turns into the letter below it. Stop when the message reads as English.</p>
+    <div class="shiftbar">
+      <label for="shift" style="margin:0">Shift</label>
+      <input id="shift" type="range" min="0" max="25" value="0">
+      <span class="shiftnum" id="shiftnum">0</span>
+    </div>
+    <div class="out" id="decoded" aria-live="polite"></div>
+    <div class="scroll" style="margin-top:14px">
+      <div class="strip" id="strip" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s3">
+    <h2 id="s3">3. Count the letters</h2>
+    <p class="hint">In English, E is the most common letter, then T and A. Longer messages follow this pattern more closely.</p>
+    <div class="freq" id="freq" aria-hidden="true"></div>
+    <label for="assume" style="margin-top:14px">Assume the most common ciphertext letter stands for</label>
+    <select id="assume">
+      <option value="E">E (most likely)</option>
+      <option value="T">T</option>
+      <option value="A">A</option>
+      <option value="O">O</option>
+    </select>
+    <div class="callout" id="guess"></div>
+    <div class="row"><button id="useGuess" class="primary" type="button">Try this shift</button></div>
+  </section>
+
+  <section aria-labelledby="s4">
+    <h2 id="s4">4. Brute force check</h2>
+    <details>
+      <summary>Show all 25 shifts at once</summary>
+      <p class="hint">Click a row to load that shift. Best kept closed until students have tried by hand.</p>
+      <table>
+        <thead><tr><th scope="col">Shift</th><th scope="col">Result</th></tr></thead>
+        <tbody id="brute"></tbody>
+      </table>
+    </details>
+  </section>
+
+  <section aria-labelledby="s5">
+    <h2 id="s5">5. Make a message for a partner</h2>
+    <label for="plain">Your message</label>
+    <input id="plain" type="text" value="MEET ME AFTER CLASS" autocomplete="off">
+    <div class="shiftbar">
+      <label for="mkshift" style="margin:0">Shift</label>
+      <input id="mkshift" type="range" min="1" max="25" value="5">
+      <span class="shiftnum" id="mknum">5</span>
+    </div>
+    <div class="out" id="made"></div>
+    <div class="row">
+      <button id="copy" type="button">Copy ciphertext</button>
+      <button id="send" type="button">Load into decoder</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var $ = function(id){ return document.getElementById(id); };
+
+  function shiftText(t, k){
+    return t.replace(/[a-z]/gi, function(c){
+      var b = c <= "Z" ? 65 : 97;
+      return String.fromCharCode(((c.charCodeAt(0) - b + k) % 26 + 26) % 26 + b);
+    });
+  }
+
+  var challenges = [
+    { name: "Challenge 1 (short)", plain: "THIS IS EASY", shift: 3 },
+    { name: "Challenge 2 (medium)", plain: "MEET ME AFTER CLASS AT THE LIBRARY", shift: 7 },
+    { name: "Challenge 3 (long)", plain: "CRYPTOGRAPHY IS THE STUDY OF KEEPING MESSAGES SECRET AND ALSO THE STUDY OF BREAKING THEM", shift: 11 }
+  ];
+  var current = challenges[0];
+
+  var cipher = $("cipher"), shift = $("shift");
+
+  function loadChallenge(c){
+    current = c;
+    cipher.value = shiftText(c.plain, c.shift);
+    shift.value = 0;
+    $("answer").hidden = true;
+    $("reveal").hidden = false;
+    update();
+  }
+
+  var chWrap = $("challenges");
+  challenges.forEach(function(c){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = c.name;
+    b.addEventListener("click", function(){ loadChallenge(c); });
+    chWrap.appendChild(b);
+  });
+
+  $("reveal").addEventListener("click", function(){
+    var a = $("answer");
+    if (current && shiftText(current.plain, current.shift) === cipher.value){
+      a.textContent = "Shift " + current.shift + ": " + current.plain;
+    } else {
+      a.textContent = "This is a custom text. Use the brute force table to find the answer.";
+    }
+    a.hidden = false;
+  });
+
+  function counts(t){
+    var n = {}, i;
+    for (i = 0; i < 26; i++) n[A[i]] = 0;
+    t.toUpperCase().replace(/[A-Z]/g, function(c){ n[c]++; return c; });
+    return n;
+  }
+
+  function topLetter(n){
+    var best = null, max = 0;
+    for (var i = 0; i < 26; i++){
+      if (n[A[i]] > max){ max = n[A[i]]; best = A[i]; }
+    }
+    return best;
+  }
+
+  function drawStrip(k){
+    var s = $("strip"); s.textContent = "";
+    function lab(t){ var d = document.createElement("div"); d.className = "lab"; d.textContent = t; s.appendChild(d); }
+    lab("Cipher letter");
+    for (var i = 0; i < 26; i++){ var d = document.createElement("div"); d.className = "c"; d.textContent = A[i]; s.appendChild(d); }
+    lab("Becomes");
+    for (var j = 0; j < 26; j++){ var e = document.createElement("div"); e.className = "c b"; e.textContent = A[((j - k) % 26 + 26) % 26]; s.appendChild(e); }
+  }
+
+  function drawFreq(n){
+    var f = $("freq"); f.textContent = "";
+    var max = 1, i;
+    for (i = 0; i < 26; i++) if (n[A[i]] > max) max = n[A[i]];
+    var top = topLetter(n);
+    for (i = 0; i < 26; i++){
+      var L = A[i];
+      var col = document.createElement("div");
+      col.className = "col" + (L === top ? " top" : "");
+      var num = document.createElement("div"); num.className = "n"; num.textContent = n[L] || "";
+      var bar = document.createElement("div"); bar.className = "bar"; bar.style.height = Math.round(n[L] / max * 105) + "px";
+      var l = document.createElement("div"); l.className = "l"; l.textContent = L;
+      col.appendChild(num); col.appendChild(bar); col.appendChild(l);
+      f.appendChild(col);
+    }
+  }
+
+  var guessShift = 0;
+  function drawGuess(n){
+    var top = topLetter(n), g = $("guess");
+    if (!top){ g.textContent = "Type or pick a ciphertext to see letter counts."; guessShift = 0; return; }
+    var target = $("assume").value;
+    guessShift = ((A.indexOf(top) - A.indexOf(target)) % 26 + 26) % 26;
+    g.textContent = "Most common letter: " + top + ". If " + top + " stands for " + target + ", the shift is " + guessShift + ".";
+  }
+
+  function drawBrute(){
+    var tb = $("brute"); tb.textContent = "";
+    for (var k = 1; k <= 25; k++){
+      (function(k){
+        var tr = document.createElement("tr");
+        tr.className = "click" + (Number(shift.value) === k ? " pick" : "");
+        var a = document.createElement("td"); a.textContent = k;
+        var b = document.createElement("td"); b.className = "t"; b.textContent = shiftText(cipher.value, -k);
+        tr.appendChild(a); tr.appendChild(b);
+        tr.addEventListener("click", function(){ shift.value = k; update(); window.scrollTo({top: 0, behavior: "smooth"}); });
+        tb.appendChild(tr);
+      })(k);
+    }
+  }
+
+  function update(){
+    var k = Number(shift.value);
+    $("shiftnum").textContent = k;
+    $("decoded").textContent = shiftText(cipher.value, -k) || "Your decoded text appears here.";
+    drawStrip(k);
+    var n = counts(cipher.value);
+    drawFreq(n);
+    drawGuess(n);
+    drawBrute();
+  }
+
+  cipher.addEventListener("input", function(){ current = null; update(); });
+  shift.addEventListener("input", update);
+  $("assume").addEventListener("change", update);
+  $("useGuess").addEventListener("click", function(){ shift.value = guessShift; update(); });
+
+  // Make-your-own
+  function updateMake(){
+    var k = Number($("mkshift").value);
+    $("mknum").textContent = k;
+    $("made").textContent = shiftText($("plain").value.toUpperCase(), k);
+  }
+  $("plain").addEventListener("input", updateMake);
+  $("mkshift").addEventListener("input", updateMake);
+  $("copy").addEventListener("click", function(){
+    var t = $("made").textContent, btn = $("copy");
+    function done(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy ciphertext"; }, 1500); }
+    try { navigator.clipboard.writeText(t).then(done, function(){ btn.textContent = "Select and copy manually"; }); }
+    catch(e){ btn.textContent = "Select and copy manually"; }
+  });
+  $("send").addEventListener("click", function(){
+    cipher.value = $("made").textContent; current = null; shift.value = 0;
+    $("answer").hidden = true; update();
+    window.scrollTo({top: 0, behavior: "smooth"});
+  });
+
+  // Theme toggle
+  $("theme").addEventListener("click", function(){
+    var r = document.documentElement;
+    var dark = r.getAttribute("data-theme") === "dark" ||
+      (!r.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    r.setAttribute("data-theme", dark ? "light" : "dark");
+  });
+
+  loadChallenge(challenges[0]);
+  updateMake();
+})();
+</script>
+</body>
+</html>
