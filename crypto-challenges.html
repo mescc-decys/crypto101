@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intro crypto challenges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg:#F5F6FA; --surface:#FFFFFF; --surface-2:#ECEFF6; --ink:#1B2440; --muted:#5D6783; --line:#C9D1E2;
+  --accent:#1F2F6B; --accent-ink:#FFFFFF; --accent-soft:#E4E9F6;
+  --hint:#7A4E00; --hint-soft:#FFF3D6; --hint-line:#E8CF8E;
+  --ok:#0F7A50; --ok-soft:#DDF3E8; --bad:#B42C45; --bad-soft:#FBE4E8;
+  --code-bg:#1B2440; --code-ink:#E8ECF8; --cell:#E6EAF3;
+  --sans:"Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display:"Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+:root[data-theme="dark"]{
+  --bg:#0C1322; --surface:#141D31; --surface-2:#1B2640; --ink:#E8EDF8; --muted:#9AA7C2; --line:#2A3858;
+  --accent:#8FA3FF; --accent-ink:#0C1322; --accent-soft:#1F2B55;
+  --hint:#F2C15A; --hint-soft:#3A2F12; --hint-line:#6B5520;
+  --ok:#4AD19A; --ok-soft:#10382B; --bad:#FF8CA0; --bad-soft:#44202A;
+  --code-bg:#080E1B; --code-ink:#DCE4F7; --cell:#223052;
+}
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body{ margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:17px; line-height:1.65; }
+a{ color:var(--accent); }
+button,input,select,textarea{ font:inherit; color:inherit; }
+:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; border-radius:4px; }
+
+.shell{ max-width:1240px; margin:0 auto; padding:22px 20px 70px; }
+header.top{ padding:8px 0 22px; }
+h1{ font-family:var(--display); font-weight:800; font-size:clamp(2rem,4.8vw,3.1rem); line-height:1.08; margin:0 0 8px; letter-spacing:-0.02em; }
+.lede{ max-width:62ch; margin:0 0 18px; color:var(--muted); }
+.strip-wrap{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; }
+.strip{ display:flex; flex-wrap:wrap; gap:4px; }
+.cell{ width:30px; height:30px; border-radius:7px; border:1px solid var(--line); background:var(--cell); color:var(--muted);
+  font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; cursor:pointer; display:grid; place-items:center; padding:0; }
+.cell.stretch{ border-style:dashed; }
+.cell.done{ background:var(--ok); border-color:var(--ok); color:#fff; }
+.cell.cur{ outline:3px solid var(--accent); outline-offset:1px; }
+.count{ font-weight:600; }
+.legend{ color:var(--muted); font-size:14px; }
+
+.layout{ display:grid; grid-template-columns:292px minmax(0,1fr); gap:28px; align-items:start; }
+.navtoggle{ display:none; width:100%; text-align:left; padding:12px 14px; border:1px solid var(--line); background:var(--surface); border-radius:10px; font-weight:600; cursor:pointer; margin-bottom:12px; }
+nav.side{ position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; padding-right:6px; }
+nav.side h2{ font-family:var(--display); font-size:1.08rem; margin:16px 0 6px; font-weight:700; color:var(--ink); }
+nav.side h2:first-child{ margin-top:0; }
+.nav-item{ display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; background:none; border:0; border-left:3px solid transparent;
+  padding:8px 10px; border-radius:0 8px 8px 0; cursor:pointer; line-height:1.3; }
+.nav-item:hover{ background:var(--surface-2); }
+.nav-item.cur{ background:var(--accent-soft); border-left-color:var(--accent); font-weight:600; }
+.dot{ flex:0 0 20px; height:20px; margin-top:1px; border-radius:50%; border:2px solid var(--line); display:grid; place-items:center; font-size:12px; color:#fff; }
+.nav-item.done .dot{ background:var(--ok); border-color:var(--ok); }
+.nav-item .num{ color:var(--muted); font-variant-numeric:tabular-nums; margin-right:4px; font-weight:500; }
+
+main.panel{ background:transparent; border:0; padding:0 0 32px; min-width:0; }
+.ch-head h2{ font-family:var(--display); font-size:clamp(1.8rem,3.6vw,2.5rem); line-height:1.12; margin:0 0 12px; letter-spacing:-0.02em; font-weight:800; }
+.facts{ display:flex; flex-wrap:wrap; gap:6px 8px; margin:0 0 14px; padding:0; list-style:none; }
+.facts li{ background:var(--surface); border:1.5px solid var(--line); border-radius:999px; padding:2px 13px; font-size:15px; }
+.facts li.lvl{ background:var(--accent-soft); font-weight:600; }
+.actions{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:6px; }
+.btn{ display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:12px; border:1.5px solid var(--line); background:var(--surface); cursor:pointer; font-weight:700; text-decoration:none; color:var(--ink); }
+.btn:hover{ background:var(--surface-2); }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.btn.primary:hover{ filter:brightness(1.08); background:var(--accent); }
+.btn.ok{ background:var(--ok); border-color:var(--ok); color:#fff; }
+.btn.small{ padding:6px 13px; font-size:15px; border-radius:9px; }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; }
+
+.tabs{ display:flex; gap:2px; border-bottom:1px solid var(--line); margin:18px 0 22px; overflow-x:auto; }
+.tab{ background:none; border:0; border-bottom:3px solid transparent; padding:10px 16px; cursor:pointer; font-weight:600; color:var(--muted); white-space:nowrap; margin-bottom:-1px; }
+.tab:hover{ color:var(--ink); }
+.tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--accent); }
+
+.prose{ max-width:70ch; }
+.prose p{ margin:0 0 12px; }
+.prose h3, .sec h3{ font-family:var(--display); font-size:1.4rem; margin:28px 0 8px; font-weight:700; }
+.prose h3:first-child{ margin-top:0; }
+.prose ul{ margin:0 0 12px; padding-left:22px; }
+.checklist{ list-style:none; padding:0; margin:0 0 12px; }
+.checklist li{ display:flex; gap:10px; align-items:flex-start; padding:5px 0; }
+.checklist input{ margin-top:5px; width:18px; height:18px; accent-color:var(--accent); flex:none; }
+.callout{ border-left:4px solid var(--accent); background:var(--accent-soft); padding:12px 16px; border-radius:0 10px 10px 0; margin:14px 0; max-width:70ch; }
+.callout.warn{ border-left-color:var(--hint-line); background:var(--hint-soft); }
+.callout p{ margin:0 0 6px; } .callout p:last-child{ margin:0; }
+
+.hint{ background:var(--hint-soft); border:1.5px solid var(--hint-line); border-radius:14px; padding:12px 16px; margin:0 0 10px; max-width:70ch; }
+.hint b{ color:var(--hint); }
+.hint p{ margin:4px 0 0; }
+
+.step{ display:grid; grid-template-columns:34px minmax(0,1fr); gap:14px; margin:0 0 22px; animation:rise .22s ease-out; }
+@keyframes rise{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){ .step{ animation:none; } }
+.step .n{ width:34px; height:34px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-weight:700; display:grid; place-items:center; }
+.step h4{ margin:3px 0 6px; font-family:var(--display); font-size:1.25rem; font-weight:700; }
+.step p{ margin:0 0 10px; max-width:68ch; }
+.gate{ max-width:68ch; }
+
+.codebox{ border-radius:10px; overflow:hidden; background:var(--code-bg); margin:8px 0 12px; max-width:100%; }
+.codebar{ display:flex; justify-content:space-between; align-items:center; padding:6px 10px 6px 14px; color:#9AA7C2; font-size:13px; border-bottom:1px solid rgba(255,255,255,.08); }
+.codebar button{ background:rgba(255,255,255,.1); border:0; color:#E6ECFA; border-radius:6px; padding:3px 10px; cursor:pointer; font-size:13px; }
+.codebox pre{ margin:0; padding:14px; overflow-x:auto; color:var(--code-ink); font-family:var(--mono); font-size:13.5px; line-height:1.55; tab-size:4; }
+
+.qa{ background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; margin:0 0 12px; max-width:70ch; }
+.qa .q{ font-weight:600; margin:0 0 8px; }
+.qa .a{ margin:10px 0 0; padding-top:10px; border-top:1px dashed var(--line); }
+.done-row{ margin-top:22px; padding-top:18px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+
+/* labs */
+.lab{ display:grid; gap:16px; }
+.lab > .intro{ margin:0; color:var(--muted); max-width:70ch; }
+.lab-part, .card{ background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:24px 26px; display:grid; gap:14px; }
+.lab-part h3{ margin:0; font-family:var(--display); font-size:1.4rem; font-weight:700; }
+.lab-intro h3{ margin:0 0 6px; font-family:var(--display); font-size:1.4rem; font-weight:700; }
+.lab-intro p{ margin:0 0 10px; max-width:72ch; }
+.lab-intro ul{ margin:0 0 10px; padding-left:24px; max-width:72ch; } .lab-intro li{ margin:4px 0; }
+.choices{ display:flex; flex-wrap:wrap; gap:12px; }
+.choice[aria-pressed="true"]{ border-color:var(--accent); background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent); }
+.field{ display:grid; gap:4px; min-width:0; }
+.flabel{ font-weight:700; font-size:16px; }
+.fnote{ font-size:13px; color:var(--muted); }
+.field textarea, .field input, .field select, select.sel, input.num{ width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:11px; background:var(--bg); min-width:0; }
+.mono{ font-family:var(--mono); font-size:13.5px; }
+textarea.mono{ resize:vertical; }
+.row{ display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+.row > .field{ flex:1 1 200px; }
+.row.tight{ gap:8px; }
+.out{ margin:0; padding:10px 12px; background:var(--surface-2); border-radius:9px; font-family:var(--mono); font-size:13.5px; white-space:pre-wrap; word-break:break-all; min-height:2.6em; }
+.out.err{ background:var(--bad-soft); color:var(--bad); font-family:var(--sans); }
+.note{ margin:0; font-size:14px; color:var(--muted); max-width:70ch; }
+.good{ color:var(--ok); font-weight:600; } .badtxt{ color:var(--bad); font-weight:600; }
+table.tbl{ width:100%; border-collapse:collapse; font-size:14px; }
+.tblwrap{ overflow-x:auto; }
+table.tbl th, table.tbl td{ text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.tbl td.mono, table.tbl td .mono{ font-family:var(--mono); font-size:13px; }
+table.tbl tr.best td{ background:var(--ok-soft); }
+.bar{ height:10px; background:var(--accent); border-radius:5px; min-width:2px; }
+.blocks{ display:flex; flex-wrap:wrap; gap:6px; }
+.blk{ font-family:var(--mono); font-size:12.5px; padding:5px 8px 5px; border-radius:7px; background:var(--cell); color:var(--ink); line-height:1.35; }
+.blk small{ display:block; font-size:10.5px; opacity:.75; font-family:var(--sans); }
+.blk.dup{ color:#0F1A2E; font-weight:600; }
+.chips{ display:flex; flex-wrap:wrap; gap:4px; }
+.chip{ min-width:30px; padding:3px 4px 2px; text-align:center; border:1px solid var(--line); background:var(--bg); border-radius:7px; font-family:var(--mono); cursor:pointer; line-height:1.2; }
+.chip small{ display:block; font-size:10px; color:var(--muted); font-family:var(--sans); }
+.chip.sel{ outline:3px solid var(--accent); outline-offset:1px; }
+.chip.changed{ background:var(--hint-soft); border-color:var(--hint-line); }
+.seq{ margin:0; padding-left:0; list-style:none; display:grid; gap:8px; }
+.seq li{ display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:start; }
+.seq .n{ width:26px; height:26px; border-radius:50%; background:var(--surface-2); display:grid; place-items:center; font-size:13px; font-weight:700; }
+.score{ font-weight:600; }
+.scratch textarea{ min-height:170px; }
+details.more{ background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:12px 16px; }
+details.more summary{ cursor:pointer; font-weight:600; }
+.empty{ padding:14px; border:1px dashed var(--line); border-radius:10px; color:var(--muted); max-width:70ch; }
+
+@media (max-width: 880px){
+  .layout{ grid-template-columns:minmax(0,1fr); }
+  .navtoggle{ display:block; }
+  nav.side{ display:none; position:static; max-height:none; margin-bottom:14px; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  nav.side.open{ display:block; }
+  main.panel{ padding:0 0 26px; }
+  .step{ grid-template-columns:28px minmax(0,1fr); gap:10px; }
+  .step .n{ width:28px; height:28px; font-size:14px; }
+}
+
+.stepper{ display:inline-flex; align-items:center; gap:14px; margin-top:6px; }
+.stepper .btn{ min-width:46px; justify-content:center; font-size:1.2rem; padding:6px 14px; }
+.stepper .val{ min-width:2.5ch; text-align:center; font-size:1.8rem; font-weight:700; font-variant-numeric:tabular-nums; font-family:var(--display); }
+table.chart td, table.chart th{ text-align:center; padding:5px 6px; }
+table.chart th{ text-align:left; white-space:nowrap; }
+.lettergrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(32px, 1fr)); gap:4px; align-items:end; max-width:760px; }
+.lcell{ display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:2px; font-size:13px; min-height:92px; }
+.lcount{ font-weight:600; min-height:1.3em; }
+.lbar{ width:70%; max-width:22px; background:var(--accent); opacity:.45; border-radius:4px 4px 0 0; }
+.lcell.top .lbar{ opacity:1; }
+.lname{ font-family:var(--mono); border-top:1px solid var(--line); width:100%; text-align:center; padding-top:2px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <h1>Intro crypto challenges</h1>
+    <p class="lede">Pick a challenge, read the mission, experiment in the workbench, and use hints before the walkthrough. Every challenge links to the official Cryptopals page, which holds the input data and expected answers. Work in any language you like.</p>
+    <div class="strip-wrap">
+      <div class="strip" id="strip" role="group" aria-label="All challenges"></div>
+      <span class="count" id="count"></span>
+      <span class="legend">Solid squares are core, dashed are stretch, green means done.</span>
+    </div>
+  </header>
+  <div class="layout">
+    <div>
+      <button class="navtoggle" id="navtoggle" type="button"></button>
+      <nav class="side" id="nav" aria-label="Challenges"></nav>
+    </div>
+    <main class="panel" id="main" tabindex="-1"></main>
+  </div>
+</div>
+<script>
+//#utils-start
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+const U = {
+  str: s => enc.encode(s),
+  text: b => dec.decode(b),
+  show: b => Array.from(b, x => (x >= 32 && x < 127 ? String.fromCharCode(x) : '.')).join(''),
+  hex: b => Array.from(b, x => x.toString(16).padStart(2, '0')).join(''),
+  unhex(s) {
+    s = s.replace(/\s+/g, '');
+    if (s.length % 2) throw new Error('Hex needs an even number of characters.');
+    if (/[^0-9a-fA-F]/.test(s)) throw new Error('Hex can only use the characters 0-9 and a-f.');
+    const o = new Uint8Array(s.length / 2);
+    for (let i = 0; i < o.length; i++) o[i] = parseInt(s.substr(i * 2, 2), 16);
+    return o;
+  },
+  b64(b) {
+    let s = '';
+    for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return btoa(s);
+  },
+  unb64(s) {
+    s = s.replace(/\s+/g, '');
+    try { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+    catch (e) { throw new Error('That does not look like valid base64.'); }
+  },
+  xor(a, b) {
+    if (a.length !== b.length) throw new Error('Both inputs must be the same length (' + a.length + ' vs ' + b.length + ' bytes).');
+    return a.map((x, i) => x ^ b[i]);
+  },
+  rkx(data, key) {
+    if (!key.length) throw new Error('The key is empty.');
+    return data.map((x, i) => x ^ key[i % key.length]);
+  },
+  concat(...arrs) {
+    const n = arrs.reduce((t, a) => t + a.length, 0);
+    const o = new Uint8Array(n);
+    let p = 0;
+    for (const a of arrs) { o.set(a, p); p += a.length; }
+    return o;
+  },
+  rand(n) { const b = new Uint8Array(n); crypto.getRandomValues(b); return b; },
+  randInt(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); },
+  pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; },
+  popcount(x) { let c = 0; while (x) { c += x & 1; x >>= 1; } return c; },
+  hamming(a, b) {
+    if (a.length !== b.length) throw new Error('Strings must be the same length.');
+    let d = 0;
+    for (let i = 0; i < a.length; i++) d += U.popcount(a[i] ^ b[i]);
+    return d;
+  },
+  blocks(b, size = 16) {
+    const out = [];
+    for (let i = 0; i < b.length; i += size) out.push(b.slice(i, i + size));
+    return out;
+  },
+  pkcs7(b, size = 16) {
+    const n = size - (b.length % size);
+    return U.concat(b, new Uint8Array(n).fill(n));
+  },
+};
+
+const FREQ = { ' ': 18.2, e: 12.7, t: 9.1, a: 8.2, o: 7.5, i: 7.0, n: 6.7, s: 6.3, h: 6.1, r: 6.0, d: 4.3, l: 4.0,
+  c: 2.8, u: 2.8, m: 2.4, w: 2.4, f: 2.2, g: 2.0, y: 2.0, p: 1.9, b: 1.5, v: 1.0, k: 0.8, j: 0.15, x: 0.15, q: 0.1, z: 0.07 };
+
+function englishScore(b) {
+  if (!b.length) return 0;
+  let s = 0;
+  for (const x of b) {
+    const c = String.fromCharCode(x).toLowerCase();
+    if (FREQ[c] !== undefined) s += FREQ[c];
+    else if (x === 9 || x === 10 || x === 13) s += 0;
+    else if (x >= 33 && x < 127) s += 0.3;
+    else s -= 8;
+  }
+  return s / b.length;
+}
+
+function keysizeTable(ct, lo = 2, hi = 40, maxPairs = 20) {
+  const rows = [];
+  for (let ks = lo; ks <= hi; ks++) {
+    const nb = Math.floor(ct.length / ks);
+    if (nb < 2) break;
+    const pairs = Math.min(nb - 1, maxPairs);
+    let tot = 0;
+    for (let i = 0; i < pairs; i++) tot += U.hamming(ct.slice(i * ks, (i + 1) * ks), ct.slice((i + 1) * ks, (i + 2) * ks)) / ks;
+    rows.push({ ks, dist: tot / pairs });
+  }
+  return rows.sort((a, b) => a.dist - b.dist);
+}
+
+// ---- big-number helpers
+function modpow(b, e, m) {
+  let r = 1n; b %= m;
+  while (e > 0n) { if (e & 1n) r = (r * b) % m; b = (b * b) % m; e >>= 1n; }
+  return r;
+}
+function gcd(a, b) { while (b) [a, b] = [b, a % b]; return a; }
+function invmod(a, m) {
+  let r0 = m, r1 = ((a % m) + m) % m, t0 = 0n, t1 = 1n;
+  while (r1) { const q = r0 / r1; [r0, r1] = [r1, r0 - q * r1]; [t0, t1] = [t1, t0 - q * t1]; }
+  return r0 === 1n ? ((t0 % m) + m) % m : null;
+}
+function le64(x) {
+  const b = new Uint8Array(8); let v = BigInt(x);
+  for (let i = 0; i < 8; i++) { b[i] = Number(v & 0xffn); v >>= 8n; }
+  return b;
+}
+
+// ---- AES helpers built on WebCrypto (only CBC and CTR exist there, so ECB is built from CBC with a zero IV)
+const ZERO_IV = new Uint8Array(16);
+const Aes = {
+  key(raw) { return crypto.subtle.importKey('raw', raw, { name: 'AES-CBC' }, false, ['encrypt', 'decrypt']); },
+  async blockEnc(key, blk) {
+    const out = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CBC', iv: ZERO_IV }, key, blk));
+    return out.slice(0, 16);
+  },
+  async blockDec(key, blk) {
+    const d = await Aes.blockEnc(key, blk.map(x => x ^ 16));
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-CBC', iv: ZERO_IV }, key, U.concat(blk, d)));
+  },
+  async ecbEnc(key, data) {
+    if (data.length % 16) throw new Error('ECB input must be a multiple of 16 bytes.');
+    const parts = [];
+    for (const b of U.blocks(data)) parts.push(await Aes.blockEnc(key, b));
+    return U.concat(...parts);
+  },
+  async ecbDec(key, data) {
+    if (data.length % 16) throw new Error('ECB input must be a multiple of 16 bytes.');
+    const parts = [];
+    for (const b of U.blocks(data)) parts.push(await Aes.blockDec(key, b));
+    return U.concat(...parts);
+  },
+  async cbcEnc(key, iv, data) { // PKCS#7 is applied by WebCrypto
+    return new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, key, data));
+  },
+  async ctrStream(key, nonce, nBlocks) {
+    const parts = [];
+    for (let i = 0; i < nBlocks; i++) parts.push(await Aes.blockEnc(key, U.concat(le64(nonce), le64(i))));
+    return U.concat(...parts);
+  },
+  async sha1(data) { return new Uint8Array(await crypto.subtle.digest('SHA-1', data)); },
+  async hmacSha1(keyBytes, data) {
+    const k = await crypto.subtle.importKey('raw', keyBytes.length ? keyBytes : new Uint8Array(1), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    return new Uint8Array(await crypto.subtle.sign('HMAC', k, data));
+  },
+};
+
+async function deflateLen(u8) {
+  const cs = new CompressionStream('deflate-raw');
+  const w = cs.writable.getWriter();
+  w.write(u8); w.close();
+  return (await new Response(cs.readable).arrayBuffer()).byteLength;
+}
+
+// ---- tiny DOM helper
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === false) continue;
+    e.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return e;
+}
+//#utils-end
+//#labs-start
+// ---------- shared lab widgets
+function field(label, control, note) {
+  return h('label', { class: 'field' }, h('span', { class: 'flabel' }, label), control, note ? h('span', { class: 'fnote' }, note) : null);
+}
+function ta(v, rows = 3, extra = {}) {
+  return h('textarea', Object.assign({ class: 'mono', rows, spellcheck: 'false', autocomplete: 'off', autocapitalize: 'off' }, extra), v);
+}
+function inp(v, extra = {}) {
+  return h('input', Object.assign({ class: 'mono', type: 'text', value: v, spellcheck: 'false', autocomplete: 'off', autocapitalize: 'off' }, extra));
+}
+function numInp(v, extra = {}) {
+  return h('input', Object.assign({ class: 'mono', type: 'text', inputmode: 'numeric', value: String(v), autocomplete: 'off' }, extra));
+}
+function outbox() {
+  const o = h('pre', { class: 'out' });
+  o.set = (t, err) => { o.textContent = t; o.classList.toggle('err', !!err); };
+  return o;
+}
+function part(title, ...kids) { return h('section', { class: 'lab-part' }, title ? h('h3', {}, title) : null, ...kids); }
+function hueOf(b) { let x = 2166136261; for (const v of b) { x ^= v; x = Math.imul(x, 16777619); } return (x >>> 0) % 360; }
+function blockView(data, size = 16) {
+  const bl = U.blocks(data, size), count = {};
+  bl.forEach(b => { const k = U.hex(b); count[k] = (count[k] || 0) + 1; });
+  const wrap = h('div', { class: 'blocks' });
+  bl.forEach((b, i) => {
+    const dup = count[U.hex(b)] > 1;
+    const d = h('div', { class: 'blk' + (dup ? ' dup' : ''), title: 'Block ' + i + (dup ? ' (appears more than once)' : '') }, h('small', {}, 'block ' + i), U.hex(b));
+    if (dup) d.style.background = 'hsl(' + hueOf(b) + ' 75% 80%)';
+    wrap.append(d);
+  });
+  return wrap;
+}
+function textBlocks(data, size = 16) {
+  const wrap = h('div', { class: 'blocks' });
+  U.blocks(data, size).forEach((b, i) => wrap.append(h('div', { class: 'blk', title: 'Plaintext block ' + i }, h('small', {}, 'block ' + i), U.show(b).replace(/ /g, '\u00a0'))));
+  return wrap;
+}
+function dupCount(data, size = 16) { const bl = U.blocks(data, size).map(U.hex); return bl.length - new Set(bl).size; }
+function keyLabel(k) { return "'" + U.show([k]) + "' (0x" + k.toString(16).padStart(2, '0') + ')'; }
+const BIG = s => { s = String(s).trim(); if (!/^\d+$/.test(s)) throw new Error('Please use whole numbers only.'); return BigInt(s); };
+
+const PRACTICE_TEXT = 'Cryptography is the practice of protecting information so that only the intended readers can make sense of it. A good cipher stays secure even when the attacker knows exactly how it works, because the strength lives in the key and not in the secrecy of the design. That is why engineers rely on algorithms that thousands of researchers have tried and failed to break, and why inventing your own scheme is almost always a mistake. Repeating a short key across a long message feels clever, but every copy of the key leaves the same fingerprint in the ciphertext. Patterns in the language of the message then leak through, letter by letter, to anyone patient enough to count.';
+
+const LABS = {};
+
+// ---------- Challenge 1: encodings
+LABS.lab1 = () => {
+  const fmt = h('select', { class: 'sel' }, h('option', { value: 'text' }, 'Text'), h('option', { value: 'hex' }, 'Hex'), h('option', { value: 'b64' }, 'Base64'));
+  const input = ta('Hello, crypto!', 3);
+  const oHex = outbox(), oB64 = outbox(), oTxt = outbox(), oLen = h('p', { class: 'note' });
+  const run = () => {
+    try {
+      const v = input.value;
+      const b = fmt.value === 'text' ? U.str(v) : fmt.value === 'hex' ? U.unhex(v) : U.unb64(v);
+      oHex.set(U.hex(b)); oB64.set(U.b64(b)); oTxt.set(U.show(b));
+      oLen.textContent = b.length + ' bytes. Bytes that are not printable characters appear as dots in the text view.';
+    } catch (e) { [oHex, oB64, oTxt].forEach(o => o.set(e.message, true)); oLen.textContent = ''; }
+  };
+  input.addEventListener('input', run); fmt.addEventListener('change', run); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Use this as a calculator to check your own functions. Type something in any format and see the same bytes written three ways.'),
+    h('div', { class: 'row' }, field('Input', input), field('The input is written as', fmt)),
+    oLen,
+    h('div', { class: 'row' }, field('As hex', oHex), field('As base64', oB64)),
+    field('As text', oTxt));
+};
+
+// ---------- Challenge 2: fixed XOR
+LABS.lab2 = () => {
+  const a = inp('0f1e2d3c4b5a6978'), b = inp('a1b2c3d4e5f60718');
+  const o = outbox(), oT = outbox(), back = h('p', { class: 'note' });
+  const run = () => {
+    try {
+      const A = U.unhex(a.value), B = U.unhex(b.value), X = U.xor(A, B);
+      o.set(U.hex(X)); oT.set(U.show(X));
+      const again = U.xor(X, B);
+      back.innerHTML = 'XOR the result with the second input again and you get the first input back: <span class="' + (U.hex(again) === U.hex(A) ? 'good">yes' : 'badtxt">no') + '</span>.';
+    } catch (e) { o.set(e.message, true); oT.set('', false); back.textContent = ''; }
+  };
+  [a, b].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'XOR two hex strings of equal length. Try making the second one a "key" and XOR the output with it again.'),
+    h('div', { class: 'row' }, field('First buffer (hex)', a), field('Second buffer (hex)', b)),
+    field('XOR result (hex)', o), field('Result as text', oT), back);
+};
+
+// ---------- Challenge 3: single-byte XOR
+const SENT = ['Meet me at the old library at noon.', 'The password is hidden under the blue door.', 'Never reuse a key, even once.',
+  'Frequency analysis beats most toy ciphers.', 'Attack the east gate at first light.', 'Bring the documents and leave by midnight.'];
+LABS.lab3 = () => {
+  let secret = null;
+  const ct = ta('', 3, { placeholder: 'Paste hex ciphertext here, or press "Generate a practice ciphertext"' });
+  const table = h('div'), reveal = h('p', { class: 'note' });
+  const run = () => {
+    table.innerHTML = '';
+    if (!ct.value.trim()) { table.append(h('div', { class: 'empty' }, 'Waiting for ciphertext. The table will rank all 256 possible keys.')); return; }
+    let b;
+    try { b = U.unhex(ct.value); } catch (e) { table.append(h('pre', { class: 'out err' }, e.message)); return; }
+    const rows = [];
+    for (let k = 0; k < 256; k++) { const p = b.map(x => x ^ k); rows.push({ k, p, s: englishScore(p) }); }
+    rows.sort((x, y) => y.s - x.s);
+    const top = rows.slice(0, 6), max = Math.max(top[0].s, 0.01);
+    table.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' },
+      h('thead', {}, h('tr', {}, h('th', {}, 'Rank'), h('th', {}, 'Key'), h('th', {}, 'English score'), h('th', {}, 'Decrypted with this key'))),
+      h('tbody', {}, top.map((r, i) => h('tr', { class: i === 0 ? 'best' : '' },
+        h('td', {}, i + 1), h('td', { class: 'mono' }, keyLabel(r.k)),
+        h('td', {}, h('div', { class: 'bar', style: 'width:' + Math.max(3, (Math.max(r.s, 0) / max) * 120) + 'px' }), h('span', { class: 'score' }, r.s.toFixed(2))),
+        h('td', { class: 'mono' }, U.show(r.p).slice(0, 70))))))));
+  };
+  const gen = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const k = chars.charCodeAt(U.randInt(0, chars.length - 1)), s = U.pick(SENT);
+    secret = { k, s }; ct.value = U.hex(U.rkx(U.str(s), [k])); reveal.textContent = ''; run();
+  };
+  const show = () => { reveal.textContent = secret ? 'Real key: ' + keyLabel(secret.k) + '. Plaintext: ' + secret.s : 'Generate a practice ciphertext first.'; };
+  ct.addEventListener('input', () => { secret = null; run(); }); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'This ranks every possible single-byte key by how English the result looks. Build the same thing in your own language, then compare its answer to this table.'),
+    h('div', { class: 'row tight' }, h('button', { class: 'btn', onclick: gen }, 'Generate a practice ciphertext'), h('button', { class: 'btn', onclick: show }, 'Show the real answer')),
+    field('Ciphertext (hex)', ct), reveal, table);
+};
+
+// ---------- Challenge 5: repeating-key XOR
+LABS.lab5 = () => {
+  const text = ta('Stream ciphers must never reuse a key stream.', 3), key = inp('KEY');
+  const o = outbox(), back = outbox(), note = h('p', { class: 'note' });
+  const run = () => {
+    try {
+      const c = U.rkx(U.str(text.value), U.str(key.value));
+      o.set(U.hex(c)); back.set(U.text(U.rkx(c, U.str(key.value))));
+      note.textContent = 'Key letters used in order: ' + Array.from({ length: Math.min(text.value.length, 12) }, (_, i) => key.value[i % key.value.length]).join(' ') + (text.value.length > 12 ? ' ...' : '');
+    } catch (e) { o.set(e.message, true); back.set(''); note.textContent = ''; }
+  };
+  [text, key].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Encrypt any text with a repeating key. Paste the plaintext and key from the official challenge to compare your code against this output.'),
+    h('div', { class: 'row' }, field('Plaintext', text), field('Key', key)), note,
+    field('Ciphertext (hex)', o), field('Decrypting again with the same key', back));
+};
+
+// ---------- Challenge 6: Hamming distance and key size
+LABS.lab6 = () => {
+  const A = inp('karolin'), B = inp('kathrin'), hOut = h('div');
+  const runA = () => {
+    hOut.innerHTML = '';
+    try {
+      const a = U.str(A.value), b = U.str(B.value), d = U.hamming(a, b);
+      hOut.append(h('p', {}, 'Hamming distance: ', h('b', {}, d + ' bits'), ' across ' + a.length + ' bytes.'),
+        h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' },
+          h('thead', {}, h('tr', {}, ['Byte', 'First', 'Second', 'XOR', 'Bits that differ'].map(t => h('th', {}, t)))),
+          h('tbody', {}, Array.from(a, (x, i) => h('tr', {}, h('td', {}, i), h('td', { class: 'mono' }, x.toString(2).padStart(8, '0')), h('td', { class: 'mono' }, b[i].toString(2).padStart(8, '0')),
+            h('td', { class: 'mono' }, (x ^ b[i]).toString(2).padStart(8, '0')), h('td', {}, U.popcount(x ^ b[i]))))))));
+    } catch (e) { hOut.append(h('pre', { class: 'out err' }, e.message)); }
+  };
+  [A, B].forEach(x => x.addEventListener('input', runA)); runA();
+
+  let secretKey = null;
+  const ct = ta('', 4, { placeholder: 'Paste base64 ciphertext here, or press "Generate a practice ciphertext"' });
+  const ksOut = h('div'), reveal = h('p', { class: 'note' });
+  const runB = () => {
+    ksOut.innerHTML = '';
+    if (!ct.value.trim()) { ksOut.append(h('div', { class: 'empty' }, 'Waiting for ciphertext. This table ranks key sizes from 2 to 40.')); return; }
+    try {
+      const b = U.unb64(ct.value), rows = keysizeTable(b), top = rows.slice(0, 6);
+      const lo = rows[0].dist, hi = rows[rows.length - 1].dist;
+      ksOut.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' },
+        h('thead', {}, h('tr', {}, h('th', {}, 'Rank'), h('th', {}, 'Key size'), h('th', {}, 'Normalized distance'), h('th', {}, 'Closeness'))),
+        h('tbody', {}, top.map((r, i) => h('tr', { class: i === 0 ? 'best' : '' }, h('td', {}, i + 1), h('td', {}, r.ks), h('td', { class: 'mono' }, r.dist.toFixed(3)),
+          h('td', {}, h('div', { class: 'bar', style: 'width:' + (8 + 110 * (1 - (r.dist - lo) / (hi - lo + 1e-9))) + 'px' }))))))),
+        h('p', { class: 'note' }, 'Multiples of the true key size often score well too. Try the smallest size among the top few, and check whether the key you recover repeats.'));
+    } catch (e) { ksOut.append(h('pre', { class: 'out err' }, e.message)); }
+  };
+  const gen = () => {
+    const n = U.randInt(3, 12); let k = '';
+    for (let i = 0; i < n; i++) k += 'abcdefghijklmnopqrstuvwxyz'[U.randInt(0, 25)];
+    secretKey = k; ct.value = U.b64(U.rkx(U.str(PRACTICE_TEXT), U.str(k))); reveal.textContent = ''; runB();
+  };
+  const showKey = () => { reveal.textContent = secretKey ? 'Real key: "' + secretKey + '" (' + secretKey.length + ' bytes).' : 'Generate a practice ciphertext first.'; };
+  ct.addEventListener('input', () => { secretKey = null; runB(); }); runB();
+
+  return h('div', { class: 'lab' },
+    part('Step 1: Hamming distance', h('p', { class: 'note' }, 'The distance is the number of bits that differ between two equal-length strings. Use it to test your own function.'),
+      h('div', { class: 'row' }, field('First string', A), field('Second string', B)), hOut),
+    part('Step 2: Guess the key size', h('p', { class: 'note' }, 'The practice ciphertext is English text XORed with a random lowercase key. Your job in the real challenge is to recover that key, this table only does the first half.'),
+      h('div', { class: 'row tight' }, h('button', { class: 'btn', onclick: gen }, 'Generate a practice ciphertext'), h('button', { class: 'btn', onclick: showKey }, 'Show the real key size')),
+      field('Ciphertext (base64)', ct), reveal, ksOut));
+};
+
+// ---------- Challenge 7: ECB pattern visualizer
+LABS.lab7 = () => {
+  const pt = ta('ATTACK AT DAWN! ATTACK AT DAWN! ATTACK AT DAWN! then a different ending.', 3);
+  const mode = h('select', { class: 'sel' }, h('option', { value: 'ECB' }, 'ECB'), h('option', { value: 'CTR' }, 'CTR'));
+  const view = h('div'); let key, nonce;
+  const newKey = async () => { key = await Aes.key(U.rand(16)); nonce = U.randInt(1, 2 ** 31); };
+  const ready = newKey();
+  const run = async () => {
+    await ready;
+    const data = U.str(pt.value); view.innerHTML = '';
+    if (!data.length) { view.append(h('div', { class: 'empty' }, 'Type some text above.')); return; }
+    let ct;
+    if (mode.value === 'ECB') ct = await Aes.ecbEnc(key, U.pkcs7(data));
+    else { const ks = await Aes.ctrStream(key, nonce, Math.ceil(data.length / 16)); ct = U.xor(data, ks.slice(0, data.length)); }
+    const d = dupCount(ct);
+    view.append(h('p', { class: 'flabel' }, 'Plaintext blocks (16 bytes each)'), textBlocks(data),
+      h('p', { class: 'flabel', style: 'margin-top:10px' }, mode.value + ' ciphertext blocks'), blockView(ct),
+      h('p', { class: 'note', style: 'margin-top:10px' }, d ? 'Repeated plaintext blocks produced repeated ciphertext blocks, so the structure of your message leaks. That is the flaw of ECB.' : 'No repeated ciphertext blocks, even where the plaintext repeats.'));
+  };
+  pt.addEventListener('input', run); mode.addEventListener('change', run); ready.then(run);
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Type a message with repeated 16-character chunks and compare ECB with CTR. Blocks that share a color are identical. This is the same idea as the bitmap demo in the lecture.'),
+    h('div', { class: 'row' }, field('Plaintext', pt), field('Mode', mode),
+      h('button', { class: 'btn', onclick: async () => { await newKey(); run(); } }, 'Use a new random key')), view);
+};
+
+// ---------- Challenge 8: ECB detector
+LABS.lab8 = () => {
+  const input = ta('', 7, { placeholder: 'One hex-encoded ciphertext per line. Press "Load a sample" to try it.' });
+  const out = h('div');
+  const run = () => {
+    out.innerHTML = '';
+    const lines = input.value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!lines.length) { out.append(h('div', { class: 'empty' }, 'Paste ciphertexts to count repeated 16-byte blocks in each one.')); return; }
+    const rows = lines.map((l, i) => { try { const b = U.unhex(l); return { i: i + 1, n: b.length, blocks: Math.ceil(b.length / 16), rep: dupCount(b) }; } catch (e) { return { i: i + 1, err: e.message }; } });
+    const best = Math.max(...rows.map(r => r.rep || 0));
+    out.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' },
+      h('thead', {}, h('tr', {}, ['Line', 'Bytes', 'Blocks', 'Repeated blocks'].map(t => h('th', {}, t)))),
+      h('tbody', {}, rows.map(r => r.err ? h('tr', {}, h('td', {}, r.i), h('td', { colspan: 3, class: 'badtxt' }, r.err))
+        : h('tr', { class: best > 0 && r.rep === best ? 'best' : '' }, h('td', {}, r.i), h('td', {}, r.n), h('td', {}, r.blocks), h('td', {}, r.rep)))))));
+  };
+  const sample = () => {
+    const lines = []; const odd = U.randInt(0, 5);
+    for (let i = 0; i < 6; i++) { const bl = Array.from({ length: 10 }, () => U.rand(16)); if (i === odd) bl[7] = bl[3]; lines.push(U.hex(U.concat(...bl))); }
+    input.value = lines.join('\n'); run();
+  };
+  input.addEventListener('input', run); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Random-looking data almost never repeats a 16-byte block. ECB output of repetitive data does. This tool counts the repeats per line, which is the entire detection trick.'),
+    h('div', { class: 'row tight' }, h('button', { class: 'btn', onclick: sample }, 'Load a sample (one line is ECB)')), field('Ciphertexts (hex, one per line)', input), out);
+};
+
+// ---------- Challenge 11: ECB or CBC game
+LABS.lab11 = () => {
+  let round = null; const score = { ok: 0, n: 0 };
+  const input = ta('hello', 2), count = numInp(43, { style: 'max-width:90px' });
+  const view = h('div'), result = h('div'), scoreLine = h('p', { class: 'note' });
+  const ecbBtn = h('button', { class: 'btn', disabled: true }, 'I think it is ECB'), cbcBtn = h('button', { class: 'btn', disabled: true }, 'I think it is CBC');
+  const nextBtn = h('button', { class: 'btn primary', style: 'display:none' }, 'Start the next round');
+  const fresh = async () => {
+    round = { mode: U.pick(['ECB', 'CBC']), key: await Aes.key(U.rand(16)), sent: false, done: false };
+    view.innerHTML = ''; result.innerHTML = ''; nextBtn.style.display = 'none'; ecbBtn.disabled = cbcBtn.disabled = true;
+    view.append(h('div', { class: 'empty' }, 'A new oracle is ready with a secret mode. Send it some input.'));
+  };
+  const send = async () => {
+    if (!round || round.done) return;
+    const user = U.str(input.value), pre = U.rand(U.randInt(5, 10)), suf = U.rand(U.randInt(5, 10)), data = U.concat(pre, user, suf);
+    const ct = round.mode === 'ECB' ? await Aes.ecbEnc(round.key, U.pkcs7(data)) : await Aes.cbcEnc(round.key, U.rand(16), data);
+    round.last = { pre: pre.length, suf: suf.length }; round.sent = true; ecbBtn.disabled = cbcBtn.disabled = false;
+    view.innerHTML = ''; view.append(blockView(ct), h('p', { class: 'note', style: 'margin-top:8px' }, 'Ciphertext is ' + ct.length + ' bytes. Blocks that share a color are identical. The oracle adds 5 to 10 random bytes before and after your input every time.'));
+  };
+  const guess = g => {
+    if (!round || !round.sent || round.done) return;
+    round.done = true; score.n++; const ok = g === round.mode; if (ok) score.ok++;
+    ecbBtn.disabled = cbcBtn.disabled = true; nextBtn.style.display = '';
+    result.innerHTML = '';
+    result.append(h('div', { class: 'callout' + (ok ? '' : ' warn') }, h('p', {}, h('b', {}, ok ? 'Correct.' : 'Not this time.'), ' The oracle used ' + round.mode + '.'),
+      h('p', {}, 'On the last query it added ' + round.last.pre + ' bytes before your input and ' + round.last.suf + ' after.')));
+    scoreLine.textContent = 'Score: ' + score.ok + ' correct out of ' + score.n + '.';
+  };
+  ecbBtn.addEventListener('click', () => guess('ECB')); cbcBtn.addEventListener('click', () => guess('CBC')); nextBtn.addEventListener('click', fresh);
+  fresh();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'You are the attacker. The oracle encrypts whatever you send under a random key, using ECB or CBC (hidden). Choose your input so the answer is obvious, then guess. Shortcut for typing: the button below fills the box with repeated letters.'),
+    h('div', { class: 'row tight' }, field('Letter count', count),
+      h('button', { class: 'btn', onclick: () => { const n = Math.min(400, Math.max(0, parseInt(count.value, 10) || 0)); input.value = 'A'.repeat(n); } }, "Fill with that many A's")),
+    field('Your input to the oracle', input),
+    h('div', { class: 'row tight' }, h('button', { class: 'btn primary', onclick: send }, 'Send to the oracle'), ecbBtn, cbcBtn, nextBtn),
+    view, result, scoreLine);
+};
+
+// ---------- Challenge 12: ECB oracle explorer
+LABS.lab12 = () => {
+  const SECRET = U.str('unlock-code:crypto-is-fun-42');
+  let key; const ready = Aes.key(U.rand(16)).then(k => { key = k; });
+  const oracle = async s => { await ready; return Aes.ecbEnc(key, U.pkcs7(U.concat(U.str(s), SECRET))); };
+  const q1 = ta('AAAAAAAAAAAAAAA', 2), q2 = ta('AAAAAAAAAAAAAAAu', 2);
+  const cmp = h('div'), lens = h('div'), secretOut = h('p', { class: 'note' });
+  const runCmp = async () => {
+    const a = await oracle(q1.value), b = await oracle(q2.value); cmp.innerHTML = '';
+    const same = []; for (let i = 0; i < Math.min(a.length, b.length) / 16; i++) if (U.hex(a.slice(i * 16, i * 16 + 16)) === U.hex(b.slice(i * 16, i * 16 + 16))) same.push(i);
+    cmp.append(h('p', { class: 'flabel' }, 'Query 1 ciphertext (' + a.length + ' bytes)'), blockView(a),
+      h('p', { class: 'flabel', style: 'margin-top:10px' }, 'Query 2 ciphertext (' + b.length + ' bytes)'), blockView(b),
+      h('p', { style: 'margin-top:10px' }, same.length ? h('span', {}, 'Identical blocks across the two queries: ', h('b', {}, same.map(i => 'block ' + i).join(', ')), '. Identical ciphertext means identical plaintext.')
+        : 'No block is identical across the two queries.'));
+  };
+  const runLens = async () => {
+    const cells = []; let prev = null;
+    for (let n = 0; n <= 40; n++) { const L = (await oracle('A'.repeat(n))).length; cells.push({ n, L, jump: prev !== null && L !== prev }); prev = L; }
+    lens.innerHTML = '';
+    lens.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' }, h('thead', {}, h('tr', {}, h('th', {}, 'Letters sent'), ...cells.map(c => h('th', { class: 'mono' }, c.n)))),
+      h('tbody', {}, h('tr', {}, h('td', {}, 'Ciphertext bytes'), ...cells.map(c => h('td', { class: 'mono', style: c.jump ? 'background:var(--hint-soft);font-weight:700' : '' }, c.L)))))));
+  };
+  [q1, q2].forEach(x => x.addEventListener('input', runCmp));
+  ready.then(() => { runCmp(); runLens(); });
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'This oracle appends a hidden secret to whatever you send and encrypts everything with AES-ECB under a fixed key. You cannot read the secret, but you can ask as many questions as you like.'),
+    part('Question 1: what is the block size?', h('p', { class: 'note' }, 'Watch the ciphertext length as you send more letters. The highlighted cells mark where it jumps, and the size of the jump is the block size.'), lens),
+    part('Question 2: what is the first byte of the secret?', h('p', { class: 'note' }, 'Query 1 sends 15 letters so the secret\'s first byte lands at the end of block 0. Query 2 sends the same 15 letters plus a guess. When block 0 matches across the two queries, your guess equals the secret\'s first byte. Change the last character of query 2 and watch.'),
+      h('div', { class: 'row' }, field('Query 1', q1), field('Query 2 (same letters plus your guess)', q2)), cmp),
+    h('details', { class: 'more' }, h('summary', {}, 'Reveal the secret (spoiler)'), h('p', { class: 'note', style: 'margin-top:8px' }, 'The secret is: ' + U.text(SECRET))));
+};
+
+// ---------- Challenge 18: CTR keystream viewer
+LABS.lab18 = () => {
+  const pt = ta('hello counter mode, this message spans several blocks', 3), key = inp('LAB-KEY-0123456!'), nonce = numInp(0, { style: 'max-width:140px' });
+  const view = h('div');
+  const run = async () => {
+    view.innerHTML = '';
+    try {
+      const kb = U.str(key.value); if (kb.length !== 16) throw new Error('The key must be exactly 16 characters (AES-128). It is ' + kb.length + ' now.');
+      const n = BIG(nonce.value), k = await Aes.key(kb), data = U.str(pt.value), nb = Math.ceil(data.length / 16);
+      if (!nb) throw new Error('Type a message first.');
+      const ks = await Aes.ctrStream(k, n, nb), ct = U.xor(data, ks.slice(0, data.length)), back = U.xor(ct, ks.slice(0, data.length));
+      const rows = [];
+      for (let i = 0; i < Math.min(nb, 6); i++) {
+        rows.push(h('tr', {}, h('td', {}, i), h('td', { class: 'mono' }, U.hex(U.concat(le64(n), le64(i)))), h('td', { class: 'mono' }, U.hex(ks.slice(i * 16, i * 16 + 16))),
+          h('td', { class: 'mono' }, U.hex(data.slice(i * 16, i * 16 + 16))), h('td', { class: 'mono' }, U.hex(ct.slice(i * 16, i * 16 + 16)))));
+      }
+      view.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' },
+        h('thead', {}, h('tr', {}, ['Block', 'Counter block (nonce, counter)', 'Keystream = AES(key, counter block)', 'Plaintext', 'Ciphertext = plaintext XOR keystream'].map(t => h('th', {}, t)))), h('tbody', {}, rows))),
+        nb > 6 ? h('p', { class: 'note' }, 'Showing the first 6 of ' + nb + ' blocks.') : null,
+        h('p', {}, 'Full ciphertext (hex):'), h('pre', { class: 'out' }, U.hex(ct)),
+        h('p', { class: 'note' }, 'Running the same function on the ciphertext gives: "' + U.text(back) + '". Encryption and decryption are one operation.'));
+    } catch (e) { view.append(h('pre', { class: 'out err' }, e.message)); }
+  };
+  [pt, key, nonce].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'See how CTR turns a block cipher into a stream cipher. Each row shows a counter block, the AES output for it, and the XOR with your message. The counter block is a 64-bit nonce followed by a 64-bit little-endian block counter, the format used in the challenge.'),
+    h('div', { class: 'row' }, field('Plaintext', pt), field('Key (16 characters)', key), field('Nonce', nonce)), view);
+};
+
+// ---------- Challenge 20: two-time pad and crib dragging
+LABS.lab20 = () => {
+  const m1 = ta('Transfer 100 dollars to Alice today.', 2), m2 = ta('Meeting moved to noon in room seven.', 2), crib = inp('dollars');
+  let ks; const ready = Aes.key(U.rand(16)).then(k => Aes.ctrStream(k, 0, 8)).then(s => { ks = s; });
+  const top = h('div'), drag = h('div');
+  const run = async () => {
+    await ready; top.innerHTML = ''; drag.innerHTML = '';
+    const a = U.str(m1.value), b = U.str(m2.value), L = Math.min(a.length, b.length, ks.length);
+    if (!L) { top.append(h('div', { class: 'empty' }, 'Type two messages.')); return; }
+    const c1 = U.xor(a.slice(0, L), ks.slice(0, L)), c2 = U.xor(b.slice(0, L), ks.slice(0, L)), x = U.xor(c1, c2), px = U.xor(a.slice(0, L), b.slice(0, L));
+    top.append(field('Ciphertext 1 (hex)', h('pre', { class: 'out' }, U.hex(c1))), field('Ciphertext 2 (hex)', h('pre', { class: 'out' }, U.hex(c2))),
+      field('Ciphertext 1 XOR ciphertext 2', h('pre', { class: 'out' }, U.hex(x))),
+      h('p', {}, 'Plaintext 1 XOR plaintext 2 is identical: ', h('span', { class: U.hex(x) === U.hex(px) ? 'good' : 'badtxt' }, U.hex(x) === U.hex(px) ? 'yes, the keystream cancelled out.' : 'no')),
+      h('p', { class: 'note' }, 'Only the first ' + L + ' bytes are compared, the length of the shorter message.'));
+    const g = U.str(crib.value);
+    if (!g.length) { drag.append(h('div', { class: 'empty' }, 'Type a guessed word or phrase (a "crib") to slide along the XOR.')); return; }
+    const rows = [];
+    for (let o = 0; o + g.length <= L; o++) {
+      const r = x.slice(o, o + g.length).map((v, i) => v ^ g[i]);
+      const good = Array.from(r).every(v => /[A-Za-z0-9 ,.'!?-]/.test(String.fromCharCode(v))) && Array.from(r).filter(v => /[A-Za-z ]/.test(String.fromCharCode(v))).length >= r.length * 0.75;
+      rows.push(h('tr', { class: good ? 'best' : '' }, h('td', {}, o), h('td', { class: 'mono' }, U.show(r).replace(/ /g, '\u00a0'))));
+    }
+    drag.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' }, h('thead', {}, h('tr', {}, h('th', {}, 'Offset'), h('th', {}, 'What the other message would say here'))), h('tbody', {}, rows))));
+  };
+  [m1, m2, crib].forEach(x => x.addEventListener('input', run)); ready.then(run);
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Two messages were encrypted with AES-CTR using the same key and the same nonce. XOR the ciphertexts and the keystream disappears. Then slide a guessed word along the result: where the guess is right, readable text from the other message appears.'),
+    h('div', { class: 'row' }, field('Message 1', m1), field('Message 2', m2)), top,
+    part('Crib dragging', h('p', { class: 'note' }, 'Start with the word "dollars". Where the result reads like English, extend your guess with what you see and drag again.'), field('Your guess for a word in either message', crib), drag));
+};
+
+// ---------- Challenge 26: CTR bit flipping
+LABS.lab26 = () => {
+  const PT = U.str('amount=100&to=bob&note=hi');
+  let ks, ct, ct2, sel = null; const ready = Aes.key(U.rand(16)).then(k => Aes.ctrStream(k, 0, 2)).then(s => { ks = s; ct = U.xor(PT, ks.slice(0, PT.length)); ct2 = ct.slice(); });
+  const chips = h('div', { class: 'chips' }), dec2 = h('pre', { class: 'out' }), info = h('p', { class: 'note' }), newCh = inp('', { maxlength: '1', style: 'max-width:80px' });
+  const draw = () => {
+    chips.innerHTML = '';
+    Array.from(PT).forEach((c, i) => chips.append(h('button', { class: 'chip' + (sel === i ? ' sel' : '') + (ct2[i] !== ct[i] ? ' changed' : ''), onclick: () => { sel = i; draw(); }, 'aria-label': 'Position ' + i },
+      String.fromCharCode(c) === ' ' ? '\u00a0' : String.fromCharCode(c), h('small', {}, i))));
+    const now = U.xor(ct2, ks.slice(0, PT.length));
+    dec2.textContent = U.show(now);
+    info.textContent = sel === null ? 'Click a character above to choose the position you want to change.' : 'Selected position ' + sel + ' (original character "' + String.fromCharCode(PT[sel]) + '"). Ciphertext byte is 0x' + ct2[sel].toString(16).padStart(2, '0') + '.';
+  };
+  const flip = () => {
+    if (sel === null || !newCh.value) { info.textContent = 'Select a position and type the character you want there.'; return; }
+    ct2[sel] = ct[sel] ^ PT[sel] ^ newCh.value.charCodeAt(0); draw();
+  };
+  const reset = () => { ct2 = ct.slice(); sel = null; draw(); };
+  ready.then(draw);
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'The message below was encrypted with CTR. You know its layout but not the key or the keystream. Pick a character, say what you want instead, and the tool XORs the matching ciphertext byte for you. The receiver decrypts your modified ciphertext without any error.'),
+    field('Original message (you can see the layout)', chips), info,
+    h('div', { class: 'row tight' }, field('Make it this character', newCh), h('button', { class: 'btn primary', onclick: flip }, 'Flip the ciphertext'), h('button', { class: 'btn', onclick: reset }, 'Reset')),
+    field('What the receiver decrypts', dec2),
+    h('p', { class: 'note' }, 'The delta you apply is (old character XOR new character). Nothing about the key was needed.'));
+};
+
+// ---------- Challenge 28: keyed hash vs HMAC
+LABS.lab28 = () => {
+  const key = inp('correct horse'), msg = inp('amount=100&to=bob');
+  const o1 = outbox(), o2 = outbox();
+  const run = async () => {
+    try { const k = U.str(key.value), m = U.str(msg.value);
+      o1.set(U.hex(await Aes.sha1(U.concat(k, m)))); o2.set(U.hex(await Aes.hmacSha1(k, m)));
+    } catch (e) { o1.set(e.message, true); o2.set(e.message, true); }
+  };
+  [key, msg].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Compare the home-made MAC from the challenge with a real HMAC. Change one character of the message or key and watch both tags change completely. Only the naive one will fall to length extension in challenge 29.'),
+    h('div', { class: 'row' }, field('Secret key', key), field('Message', msg)),
+    field('SHA-1(key followed by message), the challenge MAC', o1), field('HMAC-SHA1(key, message)', o2));
+};
+
+// ---------- Challenge 33: Diffie-Hellman with small numbers
+LABS.lab33 = () => {
+  const p = numInp(23), g = numInp(5), a = numInp(6), b = numInp(15), out = h('div'), eve = h('div');
+  const run = () => {
+    out.innerHTML = ''; eve.innerHTML = '';
+    try {
+      const P = BIG(p.value), G = BIG(g.value), Aa = BIG(a.value), Bb = BIG(b.value);
+      if (P < 3n) throw new Error('p must be at least 3.');
+      const A = modpow(G, Aa, P), B = modpow(G, Bb, P), sa = modpow(B, Aa, P), sb = modpow(A, Bb, P);
+      out.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' }, h('tbody', {},
+        h('tr', {}, h('td', {}, 'Alice sends A = g^a mod p'), h('td', { class: 'mono' }, String(A))),
+        h('tr', {}, h('td', {}, 'Bob sends B = g^b mod p'), h('td', { class: 'mono' }, String(B))),
+        h('tr', {}, h('td', {}, 'Alice computes B^a mod p'), h('td', { class: 'mono' }, String(sa))),
+        h('tr', {}, h('td', {}, 'Bob computes A^b mod p'), h('td', { class: 'mono' }, String(sb)))))),
+        h('p', {}, 'Same shared secret: ', h('span', { class: sa === sb ? 'good' : 'badtxt' }, sa === sb ? 'yes' : 'no')));
+      const go = h('button', { class: 'btn', onclick: () => {
+        const t0 = performance.now(); let x = 1n, cur = G % P, tries = 0;
+        while (cur !== A && tries < 5000000) { cur = (cur * G) % P; x++; tries++; }
+        eve.querySelector('.res').textContent = cur === A ? 'Eve found an exponent (' + x + ') after ' + tries + ' tries in ' + Math.round(performance.now() - t0) + ' ms, and can now compute the shared secret ' + modpow(B, x, P) + '.' : 'Gave up after 5 million tries.';
+      } }, 'Play Eve: brute-force the exponent');
+      eve.append(h('p', { class: 'note' }, 'Eve sees p, g, A and B, but never a or b. With a tiny p she can try every exponent. Try p = 1000003 to see the cost grow, and remember real DH uses primes with hundreds of digits.'), go, h('p', { class: 'res' }));
+    } catch (e) { out.append(h('pre', { class: 'out err' }, e.message)); }
+  };
+  [p, g, a, b].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Diffie-Hellman with numbers small enough to follow by hand. The defaults are the classic textbook example.'),
+    h('div', { class: 'row' }, field('p (public prime)', p), field('g (public base)', g), field('a (Alice secret)', a), field('b (Bob secret)', b)), out, part('What an eavesdropper can do', eve));
+};
+
+// ---------- Challenge 34: MITM on DH
+LABS.lab34 = () => {
+  const p = numInp(23), g = numInp(5), a = numInp(6), b = numInp(15), out = h('div');
+  const run = () => {
+    out.innerHTML = '';
+    try {
+      const P = BIG(p.value), G = BIG(g.value), Aa = BIG(a.value), Bb = BIG(b.value);
+      if (P < 3n) throw new Error('p must be at least 3.');
+      const A = modpow(G, Aa, P), B = modpow(G, Bb, P), sa = modpow(P, Aa, P), sb = modpow(P, Bb, P), honest = modpow(B, Aa, P);
+      const steps = [
+        ['Alice sends p, g and A = ' + A + ' toward Bob.', 'Mallory intercepts it.'],
+        ['Mallory forwards p, g and A = ' + P + ' (that is, p itself) to Bob.', 'Bob receives a "public key" equal to p.'],
+        ['Bob replies with B = ' + B + '.', 'Mallory intercepts it.'],
+        ['Mallory forwards B = ' + P + ' (p again) to Alice.', 'Alice receives a "public key" equal to p.'],
+        ['Alice computes p^a mod p = ' + sa + '. Bob computes p^b mod p = ' + sb + '.', 'Anything times p is 0 modulo p, so both secrets are 0, and Mallory knows it.']];
+      out.append(h('ol', { class: 'seq' }, steps.map((s, i) => h('li', {}, h('span', { class: 'n' }, i + 1), h('div', {}, h('div', {}, s[0]), h('div', { class: 'note' }, s[1]))))),
+        h('p', { class: 'note', style: 'margin-top:10px' }, 'Without Mallory the shared secret would have been ' + honest + '. With Mallory both sides end up with ' + sa + ', a value anyone can guess, so she can derive the session key and read or rewrite every message.'));
+    } catch (e) { out.append(h('pre', { class: 'out err' }, e.message)); }
+  };
+  [p, g, a, b].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Plain Diffie-Hellman has no authentication, so Mallory can sit in the middle. This is the parameter-injection version from the challenge: she swaps each public value for p.'),
+    h('div', { class: 'row' }, field('p', p), field('g', g), field('a (Alice)', a), field('b (Bob)', b)), out);
+};
+
+// ---------- Challenge 39: tiny RSA
+LABS.lab39 = () => {
+  const p = numInp(61), q = numInp(53), e = numInp(17), m = numInp(65), out = h('div');
+  const run = () => {
+    out.innerHTML = '';
+    try {
+      const P = BIG(p.value), Q = BIG(q.value), E = BIG(e.value), M = BIG(m.value), N = P * Q, T = (P - 1n) * (Q - 1n);
+      if (P === Q) throw new Error('Choose two different primes.');
+      if (gcd(E, T) !== 1n) throw new Error('e must share no factor with (p-1)(q-1) = ' + T + '. Try a different e or different primes.');
+      if (M >= N) throw new Error('The message number must be smaller than n = ' + N + '.');
+      const D = invmod(E, T), C = modpow(M, E, N), R = modpow(C, D, N);
+      const rows = [['n = p times q', N], ['phi = (p-1)(q-1)', T], ['d = inverse of e mod phi', D], ['Public key (e, n)', '(' + E + ', ' + N + ')'], ['Private key (d, n)', '(' + D + ', ' + N + ')'], ['Ciphertext c = m^e mod n', C], ['Decrypted c^d mod n', R]];
+      out.append(h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' }, h('tbody', {}, rows.map(r => h('tr', {}, h('td', {}, r[0]), h('td', { class: 'mono' }, String(r[1]))))))),
+        h('p', {}, 'Round trip works: ', h('span', { class: R === M ? 'good' : 'badtxt' }, R === M ? 'yes' : 'no')));
+      const go = h('button', { class: 'btn', onclick: () => {
+        const n = Number(N); if (!Number.isSafeInteger(n) || n > 4e12) { res.textContent = 'n is too large for this demo, which is exactly the point.'; return; }
+        let f = 2, steps = 0; while (f * f <= n && n % f) { f++; steps++; }
+        res.textContent = 'Found factor ' + f + ' after ' + steps + ' trial divisions. With p and q known, phi and d follow immediately.';
+      } }, 'Play the attacker: factor n');
+      const res = h('p', { class: 'note' });
+      out.append(part('Why the math is safe only for big numbers', h('p', { class: 'note' }, 'The private key is easy once you can factor n. Try two primes around a million, then imagine 1024 bits each.'), go, res));
+    } catch (er) { out.append(h('pre', { class: 'out err' }, er.message)); }
+  };
+  [p, q, e, m].forEach(x => x.addEventListener('input', run)); run();
+  return h('div', { class: 'lab' },
+    h('p', { class: 'intro' }, 'Textbook RSA with tiny primes so every number is visible. The official challenge uses e = 3 and huge primes, and asks you to write the modular inverse yourself.'),
+    h('div', { class: 'row' }, field('Prime p', p), field('Prime q', q), field('Public exponent e', e), field('Message m (a number)', m)), out);
+};
+
+// ---------- Challenge 51: compression side channel
+LABS.lab51 = () => {
+  const ALPHA = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let secret = '', known = '';
+  const fresh = () => { secret = ''; for (let i = 0; i < 8; i++) secret += ALPHA[U.randInt(0, ALPHA.length - 1)]; known = ''; };
+  fresh();
+  const reqOf = g => 'GET /?sessionid=' + g + ' HTTP/1.1\r\nHost: bank.example\r\nCookie: sessionid=' + secret + '\r\n\r\n';
+  const size = g => deflateLen(U.str(reqOf(g)));
+  const guess = inp('a'), one = h('p'), progress = h('p', { class: 'mono' }), table = h('div'), reveal = h('p', { class: 'note' });
+  const supported = typeof CompressionStream !== 'undefined';
+  const showProgress = () => { progress.textContent = 'Recovered so far: ' + known + '_'.repeat(Math.max(0, secret.length - known.length)); };
+  const runOne = async () => { if (!supported) return; const s = await size(guess.value), base = await size(''); one.textContent = 'Compressed size with your guess: ' + s + ' bytes (empty guess: ' + base + ' bytes, difference ' + (s - base) + ').'; };
+  const tryAll = async () => {
+    if (!supported) return; table.innerHTML = '';
+    if (known.length >= secret.length) { table.append(h('p', { class: 'note' }, 'You recovered the whole secret. Start a new one to play again.')); return; }
+    const rows = []; for (const c of ALPHA) rows.push({ c, s: await size(known + c) });
+    const min = Math.min(...rows.map(r => r.s)), max = Math.max(...rows.map(r => r.s)), winners = rows.filter(r => r.s === min);
+    table.append(h('p', { class: 'note' }, winners.length === 1 ? 'One character gives the smallest size, so it is the likely next character.' : 'Several characters tie. In a harder setup you would add padding tricks to break the tie.'),
+      h('div', { class: 'tblwrap' }, h('table', { class: 'tbl' }, h('thead', {}, h('tr', {}, h('th', {}, 'Next character'), h('th', {}, 'Compressed size'), h('th', {}, ''))),
+        h('tbody', {}, rows.slice().sort((x, y) => x.s - y.s).slice(0, 8).map(r => h('tr', { class: r.s === min ? 'best' : '' }, h('td', { class: 'mono' }, r.c), h('td', {}, r.s), h('td', {}, h('div', { class: 'bar', style: 'width:' + (10 + 80 * (max - r.s) / Math.max(1, max - min)) + 'px' }))))))),
+      winners.length === 1 ? h('button', { class: 'btn primary', onclick: () => { known += winners[0].c; showProgress(); tryAll(); } }, 'Accept "' + winners[0].c + '" and continue') : null);
+  };
+  showProgress(); runOne(); guess.addEventListener('input', runOne);
+  return h('div', { class: 'lab' },
+    supported ? null : h('div', { class: 'callout warn' }, h('p', {}, 'Your browser does not support CompressionStream, so this lab cannot run. The walkthrough still explains the attack.')),
+    h('p', { class: 'intro' }, 'The server compresses a request that contains a secret cookie together with text you control, then encrypts it. Encryption hides the content but not the length, so you only see a size. This lab shows that size, using real deflate compression.'),
+    part('Probe by hand', field('Your guess (goes into the URL after "sessionid=")', guess), one),
+    part('Recover the cookie one character at a time', progress,
+      h('div', { class: 'row tight' }, h('button', { class: 'btn primary', onclick: tryAll }, 'Try every next character'),
+        h('button', { class: 'btn', onclick: () => { fresh(); table.innerHTML = ''; showProgress(); reveal.textContent = ''; } }, 'New secret'),
+        h('button', { class: 'btn', onclick: () => { reveal.textContent = 'The secret is ' + secret + '.'; } }, 'Reveal the secret')),
+      reveal, table));
+};
+//#labs-end
+//#data-start
+const SETS_URL = 'https://cryptopals.com/sets/';
+const C = [
+  // ================= CORE =================
+  {
+    id: 1, set: 1, track: 'core', level: 'Warm-up', time: '10 min', section: 'Sections 0 and 2', lab: 'lab1',
+    title: 'Convert hex to base64',
+    goal: ['Write two small functions: one that turns a hex string into raw bytes, and one that writes bytes out as base64. Then convert the hex string on the official page and compare with the expected base64.'],
+    concept: ['Hex and base64 are just two ways of writing down bytes. They are encodings, not encryption. Every later challenge passes raw bytes around and only prints them as hex at the end, so these helpers are the foundation of your toolkit.'],
+    build: ['A function from a hex string to bytes', 'A function from bytes to a base64 string', 'A check that your output matches the official expected string'],
+    done: 'Your base64 output matches the official page exactly.',
+    hints: ['Two hex characters make one byte, because each hex digit is 4 bits.', 'Work on raw bytes in the middle, not on strings. Convert hex to bytes first, then bytes to base64.', 'Most languages have a built-in for each direction. Use them, but make sure you understand what they do.'],
+    steps: [
+      { t: 'Decode the hex into bytes', p: 'Turn the hex text into a byte array. Every two characters become one byte.', code: String.raw`raw = bytes.fromhex(INPUT_HEX)
+print(len(raw), "bytes")` },
+      { t: 'Encode the bytes as base64', p: 'Base64 packs 3 bytes into 4 characters. The library handles padding with "=" for you.', code: String.raw`import base64
+
+def bytes_to_b64(b: bytes) -> str:
+    return base64.b64encode(b).decode()
+
+print(bytes_to_b64(raw))` },
+      { t: 'Make the helpers reusable', p: 'Put both directions in a file you will import from every later challenge, and test that a round trip returns the original.', code: String.raw`def hex_to_bytes(h): return bytes.fromhex(h)
+def bytes_to_hex(b): return b.hex()
+
+assert hex_to_bytes(bytes_to_hex(b"round trip")) == b"round trip"` }],
+    check: [{ q: 'Is base64 a form of encryption?', a: 'No. It is an encoding with no key, so anyone can reverse it. It only makes binary data safe to paste into text.' },
+      { q: 'Why does one byte need exactly two hex digits?', a: 'One hex digit holds 4 bits (16 values). A byte is 8 bits, so it takes two digits.' }]
+  },
+  {
+    id: 2, set: 1, track: 'core', level: 'Warm-up', time: '10 min', section: 'Section 2', lab: 'lab2',
+    title: 'Fixed XOR',
+    goal: ['Write a function that takes two byte buffers of equal length and returns their XOR. Test it on the two hex strings from the official page.'],
+    concept: ['XOR is the core operation of the one-time pad: ciphertext = message XOR key. Applying the same key twice gives back the message, which is why encryption and decryption are the same function for XOR-based ciphers.'],
+    build: ['xor(a, b) that raises an error if the lengths differ', 'A round-trip test: xor(xor(m, k), k) equals m'],
+    done: 'Your output matches the expected hex on the official page.',
+    hints: ['XOR byte by byte, pairing position i of one buffer with position i of the other.', 'Decode the hex to bytes first and encode the result back to hex at the end.', 'Fail loudly if the lengths differ. Silent truncation causes confusing bugs later.'],
+    steps: [
+      { t: 'Write the function', p: 'Zip the two buffers and XOR each pair of bytes. Check the lengths first.', code: String.raw`def xor_bytes(a: bytes, b: bytes) -> bytes:
+    assert len(a) == len(b), "buffers must be the same length"
+    return bytes(x ^ y for x, y in zip(a, b))` },
+      { t: 'Run it on the challenge input', p: 'Decode both hex strings, XOR them, and print the result as hex.', code: String.raw`a = bytes.fromhex(HEX_A)
+b = bytes.fromhex(HEX_B)
+out = xor_bytes(a, b)
+print(out.hex())` },
+      { t: 'Prove it is its own inverse', p: 'This one-line test is the whole reason XOR ciphers decrypt with the same code.', code: String.raw`assert xor_bytes(out, b) == a` }],
+    check: [{ q: 'What do you get if you XOR a message with the same key twice?', a: 'The original message. (m XOR k) XOR k equals m.' },
+      { q: 'Why must a one-time pad key be as long as the message?', a: 'If the key is shorter it has to repeat, and repeated key material leaks information (you will see this in challenges 5, 6 and 20).' }]
+  },
+  {
+    id: 3, set: 1, track: 'core', level: 'Core', time: '25 min', section: 'Section 2', lab: 'lab3',
+    title: 'Single-byte XOR cipher',
+    goal: ['A hex string was XORed against a single character. Find the key and read the message. You need a way to score how "English" a piece of text looks, then try every key and keep the best.'],
+    concept: ['The lecture showed that a big key space does not guarantee security when a cipher leaks statistics. Here the key space is only 256 keys, and letter frequencies make the right one stand out immediately.'],
+    build: ['A scoring function for English text', 'A loop over all 256 keys', 'The key and the plaintext printed together'],
+    done: 'You get a readable English sentence and a single-character key.',
+    hints: ['Try all 256 key values. Each gives a candidate plaintext.', 'Score each candidate: reward common letters (e, t, a, o, space) and penalize unprintable bytes.', 'If the top two candidates are close, read them. A human can judge English instantly.'],
+    steps: [
+      { t: 'Build a scoring function', p: 'Give each common character a weight from English letter frequency and subtract for bytes that cannot appear in normal text.', code: String.raw`FREQ = {' ': 18.2, 'e': 12.7, 't': 9.1, 'a': 8.2, 'o': 7.5, 'i': 7.0, 'n': 6.7,
+        's': 6.3, 'h': 6.1, 'r': 6.0, 'd': 4.3, 'l': 4.0, 'u': 2.8, 'c': 2.8}
+
+def score(data: bytes) -> float:
+    total = 0.0
+    for byte in data:
+        ch = chr(byte).lower()
+        if ch in FREQ:
+            total += FREQ[ch]
+        elif byte in (9, 10, 13):
+            pass                       # tab and newlines are fine
+        elif byte < 32 or byte > 126:
+            total -= 10                # unprintable: very unlikely in English
+    return total` },
+      { t: 'Try every key', p: 'XOR the ciphertext with each possible key byte and keep the highest-scoring result.', code: String.raw`def crack_single_byte(ct: bytes):
+    best = max(range(256), key=lambda k: score(bytes(b ^ k for b in ct)))
+    return best, bytes(b ^ best for b in ct)
+
+key, plaintext = crack_single_byte(bytes.fromhex(CIPHERTEXT_HEX))
+print(chr(key), plaintext)` },
+      { t: 'Keep this function', p: 'Challenge 6 and challenge 20 both call crack_single_byte many times, so save it in your helper file.', code: String.raw`# Sanity test with your own message
+ct = bytes(b ^ 0x58 for b in b"Meet me at the old library at noon")
+assert crack_single_byte(ct)[0] == 0x58` }],
+    check: [{ q: 'The lecture showed a cipher with 26! keys that still fell to frequency analysis. What does the 256-key case add?', a: 'Key space size is necessary but not sufficient. A space of only 256 keys falls to plain brute force, and even a huge space falls if the statistics of the plaintext leak through, as they do here.' },
+      { q: 'Why is the space character such a useful signal?', a: 'Space is the most common character in English text, so a wrong key rarely produces the right share of spaces.' }]
+  },
+  {
+    id: 5, set: 1, track: 'core', level: 'Core', time: '15 min', section: 'Section 3', lab: 'lab5',
+    title: 'Implement repeating-key XOR',
+    goal: ['Encrypt a block of text by XORing it with a key that repeats: the first key byte with the first message byte, the second with the second, and back to the start when the key runs out. Match the official expected hex output.'],
+    concept: ['A repeating key is a very weak stream cipher whose keystream repeats every few bytes. The lecture warned about reusing a keystream. This is exactly what you are building, and challenge 6 will break it.'],
+    build: ['repeating_key_xor(data, key)', 'A test that encrypting twice returns the plaintext'],
+    done: 'Your hex output matches the official page for the given text and key.',
+    hints: ['For message position i, the key byte is key[i mod len(key)].', 'Keep newlines inside the text exactly as given on the page.', 'Encrypt then decrypt with the same function to test yourself.'],
+    steps: [
+      { t: 'Write the function', p: 'Use the modulo operator to cycle through the key.', code: String.raw`def repeating_key_xor(data: bytes, key: bytes) -> bytes:
+    return bytes(b ^ key[i % len(key)] for i, b in enumerate(data))` },
+      { t: 'Check it', p: 'Paste the plaintext and key from the official page, print the hex, and compare it with the expected output.', code: String.raw`ct = repeating_key_xor(PLAINTEXT, KEY)
+print(ct.hex())
+assert repeating_key_xor(ct, KEY) == PLAINTEXT` }],
+    check: [{ q: 'Why is this only a weak stream cipher?', a: 'A real stream cipher expands the key into a long random-looking keystream. Here the keystream is just the key repeated, so it has a short period that an attacker can find.' }]
+  },
+  {
+    id: 6, set: 1, track: 'core', level: 'Core', time: '60 to 90 min', section: 'Sections 2 and 3', lab: 'lab6',
+    title: 'Break repeating-key XOR',
+    goal: ['You get a base64 file encrypted with repeating-key XOR and an unknown key. Recover the key length from Hamming distances, then split the ciphertext into columns and solve each column as a single-byte XOR problem.'],
+    concept: ['This combines two lecture ideas: frequency analysis (Section 2) and keystream reuse (Section 3). Every byte encrypted with the same key position sees the same key byte, so each column is a separate easy puzzle.'],
+    build: ['A Hamming distance function (bits, not bytes)', 'A key-size ranker using normalized distance', 'A transpose step and per-column solver (reuse challenge 3)', 'The recovered key and the decrypted text'],
+    done: 'You print a readable plaintext and a key that makes sense.',
+    hints: ['Hamming distance counts differing bits: XOR the bytes, then count the 1 bits.', 'Average the normalized distance over several pairs of blocks so one lucky pair does not mislead you.', 'Byte j of every key-size block uses key[j], so collect byte j from each block and solve that column alone.'],
+    steps: [
+      { t: 'Measure distances', p: 'Count differing bits between two equal-length byte strings.', code: String.raw`def hamming(a: bytes, b: bytes) -> int:
+    return sum(bin(x ^ y).count("1") for x, y in zip(a, b))` },
+      { t: 'Rank key sizes', p: 'For each candidate size from 2 to 40, compare consecutive blocks, divide by the size, and average. The lowest values are the best guesses. Multiples of the real size often score well too.', code: String.raw`def keysize_candidates(ct, lo=2, hi=40, pairs=10):
+    scored = []
+    for ks in range(lo, hi + 1):
+        blocks = [ct[i:i + ks] for i in range(0, ks * (pairs + 1), ks)]
+        dists = [hamming(blocks[i], blocks[i + 1]) / ks for i in range(pairs)]
+        scored.append((sum(dists) / len(dists), ks))
+    return sorted(scored)[:5]` },
+      { t: 'Solve the columns', p: 'Take every ks-th byte starting at each offset. That column was encrypted with one key byte, so challenge 3 applies directly.', code: String.raw`def break_repeating_key(ct: bytes, ks: int) -> bytes:
+    key = bytearray()
+    for col in range(ks):
+        column = ct[col::ks]                  # every ks-th byte shares one key byte
+        k, _ = crack_single_byte(column)      # from challenge 3
+        key.append(k)
+    return bytes(key)` },
+      { t: 'Put it together', p: 'Try the top few key sizes. If the recovered key repeats itself (for example "abcabc"), the true size is the shorter one, but the plaintext is still correct.', code: String.raw`import base64
+
+ct = base64.b64decode(open("6.txt").read())
+for dist, ks in keysize_candidates(ct):
+    print(ks, break_repeating_key(ct, ks))
+
+key = break_repeating_key(ct, BEST_KEYSIZE)
+print(repeating_key_xor(ct, key).decode())` }],
+    check: [{ q: 'Why does the right key size give a smaller normalized distance?', a: 'When blocks line up with the key, the key cancels in c1 XOR c2 and leaves m1 XOR m2. Two English texts differ in fewer bits than random data does, so the average drops. With the wrong size the two blocks use different key bytes, which adds random bits.' },
+      { q: 'How is this the same idea as the two-time pad?', a: 'Each key position is reused many times, so the ciphertext bytes at that position share one keystream byte. Statistics of the plaintext leak through.' }]
+  },
+  {
+    id: 7, set: 1, track: 'core', level: 'Core', time: '20 min', section: 'Section 4', lab: 'lab7',
+    title: 'AES in ECB mode',
+    goal: ['Decrypt a base64 file that was encrypted with AES-128 in ECB mode using a key given on the official page. You may use a library for the raw AES primitive.'],
+    concept: ['Never invent your own crypto, and that includes implementing AES yourself. Use a vetted library. ECB is the simplest mode: every 16-byte block is encrypted on its own with the same key, which is precisely why it leaks patterns (see the workbench).'],
+    build: ['Base64 decoding of the file', 'AES-128-ECB decryption with the given key', 'Plaintext printed, with padding handled'],
+    done: 'You can read the decrypted text.',
+    hints: ['Decode the base64 into bytes before decrypting.', 'The key is 16 ASCII characters, so it is already the right length for AES-128.', 'The last block may contain PKCS#7 padding bytes. Ignore or strip them.'],
+    steps: [
+      { t: 'Install a library and decode', p: 'pycryptodome gives you the AES block cipher. Read the file and decode the base64.', code: String.raw`# pip install pycryptodome
+import base64
+from Crypto.Cipher import AES
+
+ct = base64.b64decode(open("7.txt").read())` },
+      { t: 'Decrypt', p: 'Create an ECB cipher object with the key and decrypt. Decode with errors="replace" so the padding bytes do not crash printing.', code: String.raw`cipher = AES.new(KEY, AES.MODE_ECB)      # KEY: the 16-byte key from the challenge page
+pt = cipher.decrypt(ct)
+print(pt.decode(errors="replace"))` }],
+    check: [{ q: 'Why does ECB take no IV or nonce?', a: 'Because every block is processed independently. That independence is the flaw: equal plaintext blocks always give equal ciphertext blocks.' }]
+  },
+  {
+    id: 8, set: 1, track: 'core', level: 'Core', time: '20 min', section: 'Section 4', lab: 'lab8',
+    title: 'Detect AES in ECB mode',
+    goal: ['A file holds many hex-encoded ciphertexts. Exactly one was encrypted with ECB. Find it without knowing any key.'],
+    concept: ['ECB gives identical ciphertext blocks for identical plaintext blocks. Random-looking data almost never repeats a 16-byte block (there are 2^128 possibilities), so any repeat is a strong signal.'],
+    build: ['A function that splits a ciphertext into 16-byte blocks', 'A repeated-block counter', 'The index of the suspicious line'],
+    done: 'One line clearly has repeated blocks and the others have none.',
+    hints: ['Split each line into 16-byte blocks. That is 32 hex characters per block.', 'Compare the number of blocks to the number of distinct blocks.', 'The line with the most repeats is your answer.'],
+    steps: [
+      { t: 'Count repeated blocks', p: 'The difference between the number of blocks and the number of unique blocks is the number of repeats.', code: String.raw`def repeated_blocks(ct: bytes, size=16) -> int:
+    blocks = [ct[i:i + size] for i in range(0, len(ct), size)]
+    return len(blocks) - len(set(blocks))` },
+      { t: 'Scan every line', p: 'Decode each hex line and pick the one with the most repeats.', code: String.raw`lines = [bytes.fromhex(l.strip()) for l in open("8.txt") if l.strip()]
+best = max(range(len(lines)), key=lambda i: repeated_blocks(lines[i]))
+print("line", best + 1, "has", repeated_blocks(lines[best]), "repeated blocks")` }],
+    check: [{ q: 'Why would random data almost never repeat a 16-byte block?', a: 'Each block has 2^128 possible values, so a repeat by chance is astronomically unlikely.' }]
+  },
+  {
+    id: 11, set: 2, track: 'core', level: 'Core', time: '30 min', section: 'Section 4', lab: 'lab11',
+    title: 'An ECB/CBC detection oracle',
+    goal: ['Write an oracle that encrypts your input under a random key, with 5 to 10 random bytes added before and after, using ECB or CBC at random. Then write a detector that tells which mode was used, by choosing a clever input.'],
+    concept: ['This turns the detection idea from challenge 8 into a chosen-plaintext attack. Since you control the input, you can make sure it produces repeated blocks if, and only if, the mode is ECB.'],
+    build: ['The oracle with random mode, key and padding bytes', 'A detector that sends chosen input and checks for repeated blocks', 'A test that it guesses right 1000 out of 1000 times'],
+    done: 'Your detector is correct every time.',
+    hints: ['You need at least two identical plaintext blocks side by side in the ciphertext.', 'The random prefix can be up to 10 bytes, so you need enough repeated input to cover the misalignment plus two full blocks.', 'Use one repeated byte, such as a run of letter A.'],
+    steps: [
+      { t: 'Build the oracle', p: 'Random key, random prefix and suffix, then a coin flip between modes. Library AES is fine for the block cipher here (the official page wants your own CBC from challenge 10).', code: String.raw`import os, random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+def oracle(plaintext: bytes):
+    key = os.urandom(16)
+    data = os.urandom(random.randint(5, 10)) + plaintext + os.urandom(random.randint(5, 10))
+    if random.random() < 0.5:
+        return AES.new(key, AES.MODE_ECB).encrypt(pad(data, 16)), "ECB"
+    iv = os.urandom(16)
+    return AES.new(key, AES.MODE_CBC, iv).encrypt(pad(data, 16)), "CBC"` },
+      { t: 'Choose the input length', p: 'The prefix is 5 to 10 bytes, so your input needs 6 to 11 bytes to finish the first block. Then you need 32 more bytes for two full identical blocks. Using 11 + 32 = 43 covers every case.', code: String.raw`PROBE = b"A" * 43` },
+      { t: 'Detect and test', p: 'Look for a repeated block. Run it many times and compare with the truth the oracle reports.', code: String.raw`def guess_mode(ct: bytes) -> str:
+    blocks = [ct[i:i + 16] for i in range(0, len(ct), 16)]
+    return "ECB" if len(blocks) != len(set(blocks)) else "CBC"
+
+hits = 0
+for _ in range(1000):
+    ct, truth = oracle(PROBE)
+    hits += guess_mode(ct) == truth
+print(hits, "/ 1000")` }],
+    check: [{ q: 'Why 43 bytes?', a: 'The prefix length is unknown (5 to 10). With 43 identical bytes, at least two complete 16-byte blocks of pure A always fall inside the ciphertext, whatever the prefix length.' },
+      { q: 'Where is the attacker able to choose plaintext in the real world?', a: 'Anywhere user input is mixed into an encrypted message, such as a profile name, a search term or a cookie value.' }]
+  },
+  {
+    id: 12, set: 2, track: 'core', level: 'Core', time: '60 min', section: 'Section 4', lab: 'lab12',
+    title: 'Byte-at-a-time ECB decryption (Simple)',
+    goal: ['An oracle appends a secret to whatever you send and encrypts everything with ECB under a fixed unknown key. Recover the secret one byte at a time, using only the oracle.'],
+    concept: ['This is the classic demonstration of why ECB must never be used. Because equal blocks give equal ciphertext, you can test guesses for the secret byte by comparing blocks, turning a 2^128 problem into 256 guesses per byte.'],
+    build: ['Discovery of the block size from ciphertext length jumps', 'Confirmation that the oracle uses ECB', 'A loop that recovers the secret byte by byte'],
+    done: 'The secret text appears, possibly with a stray padding byte at the end.',
+    hints: ['Send 1, 2, 3 ... letters and watch the ciphertext length. When it jumps, the jump size is the block size.', 'Send one byte short of a block. The first unknown secret byte falls into the last position of the block. Build a dictionary of what that block looks like for each of the 256 possible bytes.', 'After each byte is found, send one fewer filler byte and include what you already know in your guesses.'],
+    steps: [
+      { t: 'Set up the oracle', p: 'Your own oracle that appends the secret and encrypts with ECB. The official page gives you the secret in base64.', code: String.raw`import os
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+KEY = os.urandom(16)
+SECRET = b"..."       # decode the base64 given on the challenge page
+
+def oracle(mine: bytes) -> bytes:
+    return AES.new(KEY, AES.MODE_ECB).encrypt(pad(mine + SECRET, 16))` },
+      { t: 'Find the block size', p: 'Feed growing input and notice when the output length first changes.', code: String.raw`def block_size():
+    base = len(oracle(b""))
+    for n in range(1, 64):
+        if len(oracle(b"A" * n)) != base:
+            return len(oracle(b"A" * n)) - base` },
+      { t: 'Recover one byte at a time', p: 'With a filler of (block size minus 1 minus bytes known so far, modulo block size), the next unknown byte lands at the end of a block. Compare that block against the block from each of 256 guesses.', code: String.raw`def recover(bs=16):
+    known = b""
+    for _ in range(len(oracle(b""))):
+        filler = b"A" * (bs - 1 - len(known) % bs)
+        block_no = len(known) // bs
+        target = oracle(filler)[block_no * bs:(block_no + 1) * bs]
+        for guess in range(256):
+            trial = filler + known + bytes([guess])
+            if oracle(trial)[block_no * bs:(block_no + 1) * bs] == target:
+                known += bytes([guess])
+                break
+        else:
+            break           # no guess matched: we reached the padding, so we are done
+    return known
+
+print(recover(block_size()))   # expect one stray \x01 (padding) at the end` },
+      { t: 'Confirm ECB first', p: 'Before attacking, verify the mode with the detector from challenge 11: two identical blocks of input must produce two identical ciphertext blocks.', code: String.raw`ct = oracle(b"A" * 48)
+assert ct[0:16] == ct[16:32]   # ECB confirmed` }],
+    check: [{ q: 'Why does this attack work on ECB but not on CTR with a fresh nonce?', a: 'It depends on equal plaintext blocks producing equal ciphertext blocks at a known position. With a fresh nonce every block is encrypted differently, so the comparison never matches.' },
+      { q: 'Why is the work 256 guesses per byte and not 2^128?', a: 'The attacker only ever guesses one unknown byte at a time, because all the other bytes in the block are already known or chosen by the attacker.' }]
+  },
+  {
+    id: 18, set: 3, track: 'core', level: 'Core', time: '30 min', section: 'Section 4', lab: 'lab18',
+    title: 'Implement CTR, the stream cipher mode',
+    goal: ['Implement CTR mode yourself, using only the raw AES block function. Decrypt the base64 ciphertext on the official page using the given key and a nonce of zero. Check the page for the exact counter format.'],
+    concept: ['CTR turns a block cipher into a stream cipher: encrypt a counter, XOR the output with the message. It is fast, parallel, and needs only encryption. Everything in challenges 20 and 26 builds on having this working.'],
+    build: ['A counter block made from a nonce and a block counter', 'A keystream generator using AES', 'One function that both encrypts and decrypts', 'Correct handling of a final partial block'],
+    done: 'The official ciphertext decrypts to readable text.',
+    hints: ['The counter block is 16 bytes: a 64-bit nonce followed by a 64-bit block counter, both little-endian. Double check this on the official page.', 'Keystream block i is the AES encryption of counter block i. XOR it with plaintext block i.', 'For the last block, use only as many keystream bytes as there are message bytes left.'],
+    steps: [
+      { t: 'Build the counter blocks', p: 'Pack the nonce and counter as two little-endian 64-bit integers.', code: String.raw`import struct
+counter_block = struct.pack("<QQ", nonce, counter)` },
+      { t: 'Encrypt the counter and XOR', p: 'Use zip, which stops at the shorter input, so a short final block needs no special case.', code: String.raw`from Crypto.Cipher import AES
+
+def ctr(data: bytes, key: bytes, nonce: int = 0) -> bytes:
+    ecb = AES.new(key, AES.MODE_ECB)          # only the raw block cipher is used
+    out = bytearray()
+    for counter, i in enumerate(range(0, len(data), 16)):
+        keystream = ecb.encrypt(struct.pack("<QQ", nonce, counter))
+        out += bytes(c ^ k for c, k in zip(data[i:i + 16], keystream))
+    return bytes(out)` },
+      { t: 'Decrypt the challenge and test the round trip', p: 'Encryption and decryption are the same function.', code: String.raw`import base64
+ct = base64.b64decode(CT_B64)
+print(ctr(ct, KEY))
+
+msg = b"hello world, hello ctr!"
+assert ctr(ctr(msg, KEY), KEY) == msg` }],
+    check: [{ q: 'Why is decryption the same as encryption in CTR?', a: 'Both XOR the message with the same keystream, and XOR is its own inverse.' },
+      { q: 'What happens if the nonce and counter repeat under the same key?', a: 'The keystream repeats, so you have a two-time pad (Section 3 of the lecture) and challenge 20 shows how to break it.' }]
+  },
+  {
+    id: 20, set: 3, track: 'core', level: 'Core', time: '60 min', section: 'Section 3', lab: 'lab20',
+    title: 'Break fixed-nonce CTR statistically',
+    goal: ['Many plaintext lines were encrypted with CTR under the same key and the same nonce. Recover them without the key by treating the pile of ciphertexts as a repeating-key XOR problem and solving it column by column.'],
+    concept: ['This is the two-time pad disaster from the lecture, at scale. With the same keystream on every line, byte i of every line is XORed with the same keystream byte, so each column is a single-byte XOR problem.'],
+    build: ['Truncate all ciphertexts to the shortest length', 'Transpose into columns of the same position', 'Solve each column with your challenge 3 code', 'Print the recovered lines'],
+    done: 'You can read most of each line. Some errors are expected, especially near the ends.',
+    hints: ['Same nonce means the same keystream for every line, so position i uses the same key byte in every line.', 'Collect byte i from every ciphertext. That column is a single-byte XOR problem.', 'Truncate to the shortest line for a clean first pass. Longer tails have fewer samples and need manual work.'],
+    steps: [
+      { t: 'Load and truncate', p: 'Decode the lines and cut them to the length of the shortest one.', code: String.raw`import base64
+
+lines = [base64.b64decode(l) for l in open("20.txt") if l.strip()]
+n = min(len(l) for l in lines)
+cts = [l[:n] for l in lines]` },
+      { t: 'Solve each column', p: 'The keystream byte for position col is the single-byte key that makes column col look like English.', code: String.raw`keystream = bytearray()
+for col in range(n):
+    column = bytes(ct[col] for ct in cts)
+    k, _ = crack_single_byte(column)          # from challenge 3
+    keystream.append(k)` },
+      { t: 'Decrypt everything', p: 'XOR every line with the recovered keystream. The more lines you have, the better the statistics, so the official file with dozens of lines works best.', code: String.raw`for ct in cts:
+    print(bytes(c ^ k for c, k in zip(ct, keystream)))` }],
+    check: [{ q: 'Why does c1 XOR c2 leak information under a two-time pad?', a: 'The keystream cancels out, leaving m1 XOR m2. English has so much redundancy that this is enough to recover both.' },
+      { q: 'How would you fix the original system?', a: 'Use a unique nonce for every message, or better, an authenticated mode such as AES-GCM that also makes nonce reuse obvious in design.' }]
+  },
+  {
+    id: 26, set: 4, track: 'core', level: 'Core', time: '30 min', section: 'Sections 4 and 6', lab: 'lab26',
+    title: 'CTR bitflipping',
+    goal: ['A service wraps your input in a larger string and encrypts it with CTR. It quotes the characters ";" and "=", so you cannot type the target string directly. Modify the ciphertext so that it decrypts to a string containing the admin flag anyway.'],
+    concept: ['Confidentiality without integrity is often insufficient. CTR is malleable: flipping bit i of the ciphertext flips bit i of the plaintext, and you need no key to do it.'],
+    build: ['An oracle that quotes special characters and encrypts with CTR', 'A check function that looks for the admin string after decryption', 'An attack that edits the ciphertext bytes'],
+    done: 'The check function returns true for your edited ciphertext.',
+    hints: ['Since ciphertext = plaintext XOR keystream, XOR-ing a ciphertext byte with delta XORs the plaintext byte with the same delta.', 'Send harmless placeholder characters in the positions where you want the special ones.', 'You need the offset where your input starts, which is the length of the prefix the service adds.'],
+    steps: [
+      { t: 'Model the service', p: 'Use your CTR function from challenge 18. The service quotes the dangerous characters in your input before encrypting.', code: String.raw`import os
+KEY = os.urandom(16)
+PREFIX, SUFFIX = b"notes=lab;userdata=", b";footer=end"
+
+def oracle(user: bytes) -> bytes:
+    user = user.replace(b";", b"%3B").replace(b"=", b"%3D")
+    return ctr(PREFIX + user + SUFFIX, KEY)
+
+def is_admin(ct: bytes) -> bool:
+    return b";admin=true;" in ctr(ct, KEY)` },
+      { t: 'Send placeholders, then flip', p: 'The delta for each position is (placeholder XOR wanted). Apply it to the ciphertext at the offset where your input sits.', code: String.raw`target = b";admin=true;"
+placeholder = b"?" * len(target)
+ct = bytearray(oracle(placeholder))
+start = len(PREFIX)
+for i, (want, have) in enumerate(zip(target, placeholder)):
+    ct[start + i] ^= want ^ have
+print(is_admin(bytes(ct)))   # True` }],
+    check: [{ q: 'Which defense would stop this attack?', a: 'Authenticated encryption, such as AES-GCM or encrypt-then-MAC. The receiver would reject the modified ciphertext because the tag no longer matches.' },
+      { q: 'Did the attacker learn the key?', a: 'No. The attacker only used XOR algebra on bytes they already knew the plaintext for.' }]
+  },
+  {
+    id: 28, set: 4, track: 'core', level: 'Core', time: '20 min', section: 'Section 5', lab: 'lab28',
+    title: 'Implement a SHA-1 keyed MAC',
+    goal: ['Build a MAC as SHA1(key followed by message) and a verify function. Show that changing the message or using the wrong key makes verification fail. Check the official page for whether it wants your own SHA-1 implementation, since challenge 29 needs to reach inside it.'],
+    concept: ['A plain hash is not a MAC because anyone can recompute it. Mixing in a secret key fixes that, but this simple recipe has a flaw you will exploit in challenge 29, which is why real systems use HMAC.'],
+    build: ['sha1_mac(key, message)', 'verify(key, message, tag)', 'Tests: tampered message fails, wrong key fails'],
+    done: 'Good tags verify and all three negative tests fail as they should.',
+    hints: ['The tag is the SHA-1 hash of the key bytes followed by the message bytes.', 'Verification recomputes the tag and compares.', 'Write three quick tests: right key and message, altered message, wrong key.'],
+    steps: [
+      { t: 'Write the MAC and verifier', p: 'Concatenate key and message, hash, compare. (In real code you would use a constant-time comparison.)', code: String.raw`import hashlib
+
+def sha1_mac(key: bytes, msg: bytes) -> bytes:
+    return hashlib.sha1(key + msg).digest()
+
+def verify(key: bytes, msg: bytes, tag: bytes) -> bool:
+    return sha1_mac(key, msg) == tag` },
+      { t: 'Test it', p: 'These three assertions capture what a MAC promises.', code: String.raw`key = b"some secret"
+tag = sha1_mac(key, b"amount=100")
+assert verify(key, b"amount=100", tag)
+assert not verify(key, b"amount=900", tag)
+assert not verify(b"wrong key", b"amount=100", tag)` }],
+    check: [{ q: 'Why can an attacker not just recompute the tag after changing the message?', a: 'The tag depends on the secret key, which the attacker does not have.' },
+      { q: 'Why is SHA1(key || message) not recommended?', a: 'SHA-1 is built so its output reveals its internal state, which lets an attacker append data and compute a valid new tag without the key. That is length extension, challenge 29. HMAC avoids it by nesting two hashes.' }]
+  },
+  // ================= STRETCH =================
+  {
+    id: 13, set: 2, track: 'stretch', level: 'Stretch', time: '45 min', section: 'Sections 4 and 6', lab: null,
+    prereq: 'Needs a working ECB oracle from challenge 12 and PKCS#7 padding (challenge 9).',
+    title: 'ECB cut-and-paste',
+    goal: ['A profile service encodes an email address into a string like email=...&uid=10&role=user and encrypts it with ECB. You can only create profiles through the email field. Build a ciphertext that decrypts to a profile with role=admin, by rearranging ciphertext blocks you obtained legitimately.'],
+    concept: ['ECB blocks are independent, so blocks can be moved between messages and still decrypt. Without integrity protection, an attacker assembles forged messages from valid pieces.'],
+    build: ['profile_for(email) that strips & and =', 'An encrypt and decrypt pair', 'An attack that assembles a forged admin ciphertext'],
+    done: 'Decrypting your forged ciphertext shows role=admin.',
+    hints: ['Arrange for the word "admin" (plus PKCS#7 padding) to begin exactly at a block boundary inside an email you choose. Save that encrypted block.', 'Choose a second email length so that "role=" ends exactly at a block boundary. The next block then holds "user" plus padding.', 'Swap that last block for the saved admin block.'],
+    steps: [
+      { t: 'Model the service', p: 'The service removes the characters & and = from the email so you cannot inject fields directly.', code: String.raw`import os
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+
+KEY = os.urandom(16)
+
+def profile_for(email: bytes) -> bytes:
+    email = email.replace(b"&", b"").replace(b"=", b"")
+    return b"email=" + email + b"&uid=10&role=user"
+
+def encrypt_profile(email: bytes) -> bytes:
+    return AES.new(KEY, AES.MODE_ECB).encrypt(pad(profile_for(email), 16))` },
+      { t: 'Steal an admin block', p: '"email=" is 6 bytes, so 10 filler bytes complete block 0. Block 1 then starts with whatever you type next: "admin" followed by valid padding bytes.', code: String.raw`evil = b"A" * 10 + pad(b"admin", 16)
+admin_block = encrypt_profile(evil)[16:32]` },
+      { t: 'Align "role=" and splice', p: 'With a 13-character email, the string "email=...&uid=10&role=" is exactly 32 bytes. Keep those two blocks and append the stolen block.', code: String.raw`ct = encrypt_profile(b"foo12@bar.com")
+forged = ct[:32] + admin_block
+print(unpad(AES.new(KEY, AES.MODE_ECB).decrypt(forged), 16))
+# b"email=foo12@bar.com&uid=10&role=admin"` }],
+    check: [{ q: 'Which property of ECB makes cut-and-paste possible?', a: 'Every block is encrypted independently, so each ciphertext block decrypts correctly wherever it is placed.' },
+      { q: 'Does stripping & and = fix the design?', a: 'No. Input filtering is not integrity protection. The real fix is authenticated encryption.' }]
+  },
+  {
+    id: 16, set: 2, track: 'stretch', level: 'Stretch', time: '45 min', section: 'Sections 4 and 6', lab: null,
+    prereq: 'Needs CBC mode (challenge 10) and PKCS#7 padding (challenge 9). Library CBC is fine for a first pass.',
+    title: 'CBC bitflipping attacks',
+    goal: ['The same idea as challenge 26, but with CBC. A service quotes special characters and encrypts with CBC. Edit the ciphertext so the decrypted text contains the admin flag, accepting that one block of the decrypted text will turn into garbage.'],
+    concept: ['In CBC decryption, plaintext block i is D(ciphertext block i) XOR ciphertext block i-1. Flipping a bit in block i-1 flips the same bit in plaintext block i, but scrambles plaintext block i-1.'],
+    build: ['A CBC oracle with a prefix and suffix', 'A check that searches the decrypted bytes for the admin string', 'The bit-flipping edit'],
+    done: 'The check returns true, even though one plaintext block is garbled.',
+    hints: ['Make your input two blocks long. The first is a sacrificial block that will be garbled, the second carries placeholders.', 'The bytes to edit are in the ciphertext block just before the block with the placeholders.', 'Use a prefix whose length is a multiple of 16 so your input starts on a block boundary.'],
+    steps: [
+      { t: 'Model the service', p: 'The prefix here is exactly 32 bytes, so user data begins at the start of block 2.', code: String.raw`import os
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+KEY, IV = os.urandom(16), os.urandom(16)
+PREFIX, SUFFIX = b"notes=labs;session=100;userdata=", b";footer=end"   # prefix is 32 bytes
+
+def oracle(user: bytes) -> bytes:
+    user = user.replace(b";", b"%3B").replace(b"=", b"%3D")
+    return AES.new(KEY, AES.MODE_CBC, IV).encrypt(pad(PREFIX + user + SUFFIX, 16))
+
+def is_admin(ct: bytes) -> bool:
+    return b";admin=true;" in AES.new(KEY, AES.MODE_CBC, IV).decrypt(ct)` },
+      { t: 'Flip bits in the previous block', p: 'Your first 16 input bytes become ciphertext block 2 (sacrificed). Your next 16 bytes become block 3, which holds the placeholders. Edit block 2 at the positions of the placeholders.', code: String.raw`ct = bytearray(oracle(b"A" * 16 + b"?admin?true?AAAA"))
+for pos, want in ((0, b";"), (6, b"="), (11, b";")):
+    ct[32 + pos] ^= ord("?") ^ want[0]
+print(is_admin(bytes(ct)))   # True` }],
+    check: [{ q: 'What is the price of a CBC bit flip compared with CTR?', a: 'The block you edit (the previous ciphertext block) decrypts to garbage, so you must be able to spare it.' },
+      { q: 'Why does encrypt-then-MAC stop this?', a: 'The receiver checks the tag before decrypting, and any edited ciphertext fails the check.' }]
+  },
+  {
+    id: 29, set: 4, track: 'stretch', level: 'Stretch', time: '90 min', section: 'Section 5', lab: null,
+    prereq: 'Needs a SHA-1 you can modify (your own implementation) and the MAC from challenge 28.',
+    title: 'Break a SHA-1 keyed MAC using length extension',
+    goal: ['Given a message and a valid SHA1(key || message) tag, forge a valid tag for that message plus padding plus extra data you choose, without knowing the key. You will need to load a SHA-1 implementation with the state from the old tag, and guess the key length.'],
+    concept: ['SHA-1 hashes in blocks and its output is its internal state. So the tag lets you resume hashing where the server stopped. This is exactly why HMAC nests two hashes, as in Section 5 of the lecture.'],
+    build: ['SHA-1 padding for a message of a given length', 'A SHA-1 that accepts an initial state and a count of bytes already hashed', 'A forgery loop that tries key lengths'],
+    done: 'The server accepts your forged message and tag.',
+    hints: ['After hashing key || message, SHA-1 appended padding. Your forged message must include that padding ("glue") in the middle.', 'The five 32-bit words of the tag are the internal state. Start your hash from them.', 'You do not know the key length. Try 0 up to 64 and keep the one the verifier accepts.'],
+    steps: [
+      { t: 'Write the padding function', p: 'Append a 1 bit, zeros up to 56 mod 64, then the bit length as a big-endian 64-bit number.', code: String.raw`import struct, hashlib
+
+def md_padding(msg_len: int) -> bytes:
+    pad = b"\x80" + b"\x00" * ((55 - msg_len) % 64)
+    return pad + struct.pack(">Q", msg_len * 8)` },
+      { t: 'Write a SHA-1 that can resume', p: 'Two extra parameters: the starting state, and how many bytes were already hashed so the final padding has the right length. Test it against hashlib before going further.', code: String.raw`def lrot(x, n): return ((x << n) | (x >> (32 - n))) & 0xffffffff
+
+def sha1(data, state=(0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0), prior_len=0):
+    h = list(state)
+    data += md_padding(prior_len + len(data))
+    for off in range(0, len(data), 64):
+        w = list(struct.unpack(">16I", data[off:off + 64]))
+        for i in range(16, 80):
+            w.append(lrot(w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16], 1))
+        a, b, c, d, e = h
+        for i in range(80):
+            if i < 20:   f, k = (b & c) | (~b & d), 0x5A827999
+            elif i < 40: f, k = b ^ c ^ d, 0x6ED9EBA1
+            elif i < 60: f, k = (b & c) | (b & d) | (c & d), 0x8F1BBCDC
+            else:        f, k = b ^ c ^ d, 0xCA62C1D6
+            a, b, c, d, e = (lrot(a, 5) + f + e + k + w[i]) & 0xffffffff, a, lrot(b, 30), c, d
+        h = [(x + y) & 0xffffffff for x, y in zip(h, (a, b, c, d, e))]
+    return struct.pack(">5I", *h)
+
+assert sha1(b"abc") == hashlib.sha1(b"abc").digest()` },
+      { t: 'Forge the tag', p: 'For each guessed key length, build the glue padding, resume hashing from the old tag with the extra data, and ask the verifier.', code: String.raw`def forge(msg, tag, extra, verify):
+    state = struct.unpack(">5I", tag)
+    for key_len in range(0, 65):
+        glue = md_padding(key_len + len(msg))
+        new_msg = msg + glue + extra
+        new_tag = sha1(extra, state, key_len + len(msg) + len(glue))
+        if verify(new_msg, new_tag):
+            return new_msg, new_tag.hex(), key_len` }],
+    check: [{ q: 'Why does HMAC resist length extension?', a: 'The outer hash wraps the inner result with a second key-derived value, so the published tag is not the internal state of a hash an attacker can continue.' },
+      { q: 'Why must the forged message contain the padding bytes?', a: 'The original tag covers key, message and padding. Hashing continues after that padding, so it is part of the data the server will hash.' }]
+  },
+  {
+    id: 31, set: 4, track: 'stretch', level: 'Stretch', time: '60 min', section: 'Sections 4 and 5', lab: null,
+    prereq: 'You write a small web server yourself, in any language and framework, so have one installed.',
+    title: 'Implement and break HMAC-SHA1 with an artificial timing leak',
+    goal: ['Write a small web app that checks an HMAC signature byte by byte and stops at the first mismatch, pausing briefly after each matching byte. Then write a client that recovers a valid signature for a file by measuring response times.'],
+    concept: ['Comparing a MAC with an early exit leaks how many leading bytes are right. This is a timing side channel. The lecture mentioned constant-time AES-NI for a related reason: secret-dependent timing gives attackers information.'],
+    build: ['A server with an insecure compare and a fixed delay per matching byte', 'A client that times guesses for each byte position', 'The recovered signature accepted by the server'],
+    done: 'The server accepts your signature for a file you never had the key for.',
+    hints: ['For each byte position, try all 256 values and time the request. The slowest one is correct.', 'Take the median of several measurements per guess to ignore noise.', 'Fix the bytes you already found and pad the rest of the signature with zeros.'],
+    steps: [
+      { t: 'Build the leaky server (outline)', p: 'The compare function sleeps a fixed number of milliseconds for each matching byte, then returns false at the first difference. The official page gives the exact rules. The fix for real code is one line: hmac.compare_digest.', code: String.raw`# server side idea
+import time
+
+def insecure_compare(a: bytes, b: bytes, delay=0.05) -> bool:
+    if len(a) != len(b):
+        return False
+    for x, y in zip(a, b):
+        if x != y:
+            return False
+        time.sleep(delay)
+    return True` },
+      { t: 'Time every guess', p: 'For each position, measure the median response time for all 256 byte values. Keep the slowest, and move to the next position.', code: String.raw`import time, requests, statistics
+
+URL, FILE = "http://localhost:9000/test", "report.txt"
+
+def timed(sig_hex: str, samples=5) -> float:
+    times = []
+    for _ in range(samples):
+        t0 = time.perf_counter()
+        requests.get(URL, params={"file": FILE, "signature": sig_hex})
+        times.append(time.perf_counter() - t0)
+    return statistics.median(times)
+
+sig = ""
+for pos in range(20):                             # HMAC-SHA1 is 20 bytes
+    timings = {b: timed(sig + f"{b:02x}" + "00" * (19 - pos)) for b in range(256)}
+    sig += f"{max(timings, key=timings.get):02x}"
+    print(pos, sig)` }],
+    check: [{ q: 'What is the standard fix for this leak?', a: 'Compare MACs in constant time, for example hmac.compare_digest in Python, so the response time does not depend on how many bytes match.' },
+      { q: 'Why does a smaller delay make the attack harder, not impossible?', a: 'Noise hides small differences, but repeating measurements and using statistics recovers them. Real attacks have worked with microsecond-scale leaks.' }]
+  },
+  {
+    id: 51, set: 7, track: 'stretch', level: 'Stretch', time: '60 min', section: 'Section 7', lab: 'lab51',
+    prereq: 'This is in the hard Set 7, but the core attack is short. Try the workbench first.',
+    title: 'Compression Ratio Side-Channel Attacks',
+    goal: ['An oracle compresses a request that contains a secret session cookie along with data you control, then encrypts it and returns the ciphertext length. Recover the cookie one character at a time. The official page also has a variant using a block cipher, where padding adds a complication.'],
+    concept: ['This models the CRIME attack from the lecture. Compression shrinks repeated text, encryption hides content but not length, so a correct guess that repeats part of the secret makes the output slightly shorter.'],
+    build: ['An oracle that returns the compressed length of a request containing the secret', 'A loop that tries each candidate character and keeps the one giving the smallest size', 'A way to handle ties (for the harder variants)'],
+    done: 'You recover the full secret cookie.',
+    hints: ['Put "sessionid=" plus your guess into the attacker-controlled part. If the guess matches the secret so far, the compressor reuses it.', 'Choose the candidate with the smallest compressed length. The known part grows by one character each round.', 'When two candidates tie, add a bit of incompressible padding and compare again. Block ciphers need extra padding steps because length changes only in 16-byte jumps.'],
+    steps: [
+      { t: 'Build the oracle', p: 'We model a stream cipher, so the ciphertext length equals the compressed length.', code: String.raw`import string, zlib
+
+SECRET = "a1b2c3d4"     # hidden from the attacker
+
+def oracle(guess: str) -> int:
+    request = f"GET /?sessionid={guess} HTTP/1.1\r\nHost: bank.example\r\nCookie: sessionid={SECRET}\r\n\r\n"
+    return len(zlib.compress(request.encode()))` },
+      { t: 'Recover one character per round', p: 'Try every character after what you know. The one that compresses best is the next character.', code: String.raw`alphabet = string.ascii_lowercase + string.digits
+known = ""
+while len(known) < len(SECRET):          # a real attacker stops when nothing wins clearly
+    sizes = {c: oracle(known + c) for c in alphabet}
+    best = min(sizes.values())
+    winners = [c for c, s in sizes.items() if s == best]
+    if len(winners) != 1:
+        raise SystemExit(f"tie between {winners}: add padding tricks")
+    known += winners[0]
+print(known)` }],
+    check: [{ q: 'Why does a correct guess make the ciphertext shorter?', a: 'The compressor replaces the repeated text with a short back-reference, so the request shrinks slightly. Encryption does not hide that length.' },
+      { q: 'Name two defenses.', a: 'Disable compression for secrets (what TLS did), keep attacker-controlled data and secrets in separate compression contexts, or rotate the secret after every request.' }]
+  },
+  {
+    id: 33, set: 5, track: 'stretch', level: 'Stretch', time: '30 min', section: 'Section 11', lab: 'lab33',
+    title: 'Implement Diffie-Hellman',
+    goal: ['Implement Diffie-Hellman key exchange with big integers: each side picks a secret, publishes g to that power modulo p, and derives the shared secret. Use the prime p and generator g given on the official page.'],
+    concept: ['Each side computes a value the other side can combine with its own secret to reach the same number, while an eavesdropper only sees the published values. This is the key exchange inside TLS 1.3.'],
+    build: ['Key pairs (secret and public) for Alice and Bob', 'Shared secret computed on both sides', 'A check that both sides agree'],
+    done: 'Both shared secrets are equal.',
+    hints: ['The public value is g^a mod p. Use the built-in modular exponentiation, not a plain power.', 'Alice computes B^a and Bob computes A^b. Both equal g^(ab) mod p.', 'Test with small numbers first (p = 37, g = 5), then switch to the real prime.'],
+    steps: [
+      { t: 'Generate keys', p: 'Use three-argument pow so that big numbers stay fast.', code: String.raw`import secrets
+
+# p and g are given on the challenge page
+a = secrets.randbelow(p)
+A = pow(g, a, p)
+b = secrets.randbelow(p)
+B = pow(g, b, p)` },
+      { t: 'Derive the shared secret', p: 'Both sides land on the same number. In practice you hash it to get a symmetric key.', code: String.raw`import hashlib
+
+s_alice = pow(B, a, p)
+s_bob = pow(A, b, p)
+assert s_alice == s_bob
+
+def derive_key(s: int) -> bytes:
+    n = max(1, (s.bit_length() + 7) // 8)
+    return hashlib.sha1(s.to_bytes(n, "big")).digest()[:16]` }],
+    check: [{ q: 'What does an eavesdropper see?', a: 'p, g, A and B, but never a or b. Computing a from A is the discrete logarithm problem, which is hard for a large p.' },
+      { q: 'Why did TLS 1.3 add authentication on top of plain DH?', a: 'Plain DH resists passive eavesdroppers only. An active man in the middle can run DH with each side. Signing the handshake with a certificate key stops that.' }]
+  },
+  {
+    id: 34, set: 5, track: 'stretch', level: 'Stretch', time: '45 min', section: 'Section 11', lab: 'lab34',
+    prereq: 'Needs the DH code from challenge 33, plus AES-CBC from challenge 10 for the full message exchange.',
+    title: 'Implement a MITM key-fixing attack on Diffie-Hellman with parameter injection',
+    goal: ['Build Alice, Bob and a man in the middle. Mallory swaps each public value for p. Both sides derive the same predictable secret, and Mallory can decrypt the messages they exchange with AES-CBC.'],
+    concept: ['This is the man-in-the-middle limitation from Section 11: DH alone gives no authentication. If anything in the exchange can be replaced, the key is not secret.'],
+    build: ['The three-party message flow', 'Key derivation that matches on all sides', 'Mallory decrypting traffic without either party noticing'],
+    done: 'Mallory reads the plaintext messages.',
+    hints: ['If the public value is p, then p^x mod p equals 0 for any x.', 'So both sides derive their key from the secret 0. Mallory derives the same key.', 'Derive the key exactly the way Alice and Bob do, including how the number is turned into bytes.'],
+    steps: [
+      { t: 'Understand the swap', p: 'Mallory forwards p instead of A to Bob, and p instead of B to Alice. The workbench shows the sequence step by step.', code: String.raw`# A -> M : p, g, A       M -> B : p, g, p
+# B -> M : B             M -> A : p
+# Alice: s = pow(p, a, p) == 0     Bob: s = pow(p, b, p) == 0` },
+      { t: 'Let Mallory derive the key', p: 'Reuse derive_key from challenge 33. Mallory knows the secret is 0.', code: String.raw`mallory_key = derive_key(0)
+# decrypt both directions with AES-CBC using mallory_key and the IV sent with each message` }],
+    check: [{ q: 'Why is the shared secret always 0 here?', a: 'Each party raises p to its secret exponent modulo p. p is 0 modulo p, so the result is 0.' },
+      { q: 'What stops this in practice?', a: 'Authenticating the key exchange, for example with signatures verified against certificates as in TLS 1.3.' }]
+  },
+  {
+    id: 39, set: 5, track: 'stretch', level: 'Stretch', time: '45 min', section: 'Section 8', lab: 'lab39',
+    title: 'Implement RSA',
+    goal: ['Implement textbook RSA from scratch: generate two primes, compute n and the totient, find the private exponent with a modular inverse, and show that a message survives a round trip. The official page uses e = 3 and asks you to write the modular inverse yourself.'],
+    concept: ['RSA is the trapdoor function from Section 8: easy to compute with the public key, hard to invert without the private key. Its hardness rests on the difficulty of factoring n. The lecture also marks RSA as "don\'t use" for new designs, and this textbook version has no padding and is not safe.'],
+    build: ['An extended Euclidean algorithm for the modular inverse', 'Key generation with primes', 'Encrypt and decrypt with modular exponentiation'],
+    done: 'Decrypting the ciphertext gives back the original number.',
+    hints: ['With e = 3, each prime minus 1 must not be a multiple of 3, otherwise e has no inverse. Generate new primes until it works.', 'The private exponent d is the inverse of e modulo (p-1)(q-1).', 'Encrypt with pow(m, e, n) and decrypt with pow(c, d, n).'],
+    steps: [
+      { t: 'Write the modular inverse', p: 'The extended Euclidean algorithm finds d such that e times d is 1 modulo the totient.', code: String.raw`def invmod(a: int, m: int) -> int:
+    r0, r1, t0, t1 = m, a % m, 0, 1
+    while r1:
+        q = r0 // r1
+        r0, r1 = r1, r0 - q * r1
+        t0, t1 = t1, t0 - q * t1
+    assert r0 == 1, "no inverse: a and m share a factor"
+    return t0 % m` },
+      { t: 'Generate keys', p: 'Primes from a library are fine. Retry until the public exponent is usable.', code: String.raw`from Crypto.Util.number import getPrime, GCD
+
+def keygen(bits=512, e=3):
+    while True:
+        p, q = getPrime(bits), getPrime(bits)
+        phi = (p - 1) * (q - 1)
+        if p != q and GCD(e, phi) == 1:
+            return (e, p * q), (invmod(e, phi), p * q)` },
+      { t: 'Round trip', p: 'Keep m smaller than n.', code: String.raw`pub, priv = keygen()
+m = 42
+c = pow(m, pub[0], pub[1])
+assert pow(c, priv[0], priv[1]) == m` }],
+    check: [{ q: 'What is the trapdoor in RSA?', a: 'Knowing the factorization of n. With p and q you can compute the totient and the private exponent, without them inverting the operation is believed to be hard.' },
+      { q: 'Why is textbook RSA unsafe to use directly?', a: 'It is deterministic and malleable, with no padding. Equal messages give equal ciphertexts and ciphertexts can be manipulated. Real systems use padding schemes or hybrid encryption.' }]
+  }
+];
+C.forEach(c => { c.url = c.set ? SETS_URL + c.set + '/challenges/' + c.id : null; });
+const byId = Object.fromEntries(C.map(c => [c.id, c]));
+//#data-end
+//#app-start
+const STORE_KEY = 'cplab:v1';
+let state = { done: {}, chk: {}, cur: 1 };
+try {
+  const s = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+  if (s && typeof s === 'object') state = Object.assign(state, s);
+} catch (e) { /* storage unavailable, progress stays in memory */ }
+const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } };
+const ui = {};
+const lbl = c => (c.id === 0 ? c.title : c.id + '. ' + c.title);
+const TABS = [['mission', 'Mission'], ['bench', 'Workbench'], ['hints', 'Hints'], ['walk', 'Walkthrough'], ['check', 'Check in']];
+
+const canEval = (() => { try { return new Function('return 1')() === 1; } catch (e) { return false; } })();
+const H = {
+  hex: U.hex, unhex: U.unhex, b64: U.b64, unb64: U.unb64, str: U.str, text: U.text, show: U.show, xor: U.xor, rkx: U.rkx,
+  hamming: U.hamming, score: englishScore, concat: U.concat, rand: U.rand, blocks: U.blocks, pkcs7: U.pkcs7,
+  ecbEnc: async (k, d) => Aes.ecbEnc(await Aes.key(k), d), ecbDec: async (k, d) => Aes.ecbDec(await Aes.key(k), d),
+  sha1: Aes.sha1, hmacSha1: Aes.hmacSha1,
+};
+const STARTERS = {
+  1: "// Convert hex to base64 on raw bytes\nconst bytes = H.unhex('48656c6c6f');\nprint(H.b64(bytes));",
+  2: "// Fixed XOR\nconst a = H.unhex('0f1e2d3c');\nconst b = H.unhex('a1b2c3d4');\nprint(H.hex(H.xor(a, b)));",
+  3: "// Try every single-byte key and print the best three\nconst ct = H.unhex('PASTE_HEX_HERE');\nconst rows = [];\nfor (let k = 0; k < 256; k++) {\n  const p = ct.map(x => x ^ k);\n  rows.push([H.score(p), k, H.show(p)]);\n}\nrows.sort((x, y) => y[0] - x[0]);\nrows.slice(0, 3).forEach(r => print(r[1], r[0].toFixed(2), r[2]));",
+  5: "// Repeating-key XOR\nconst ct = H.rkx(H.str('some text'), H.str('ICE'));\nprint(H.hex(ct));",
+};
+const DEFAULT_STARTER = "// Helpers on H: hex, unhex, b64, unb64, str, text, show, xor, rkx, hamming, score, blocks, pkcs7,\n// and await H.ecbEnc(key, data), await H.ecbDec(key, data), await H.sha1(data)\n// Use print(...) to show results.\nprint(H.hex(H.str('hello')));";
+
+function fmtOut(x) {
+  if (typeof x === 'string') return x;
+  if (x instanceof Uint8Array) return U.hex(x);
+  if (typeof x === 'bigint') return x + 'n';
+  try { return JSON.stringify(x); } catch (e) { return String(x); }
+}
+async function runScratch(code, out) {
+  const log = [], print = (...a) => log.push(a.map(fmtOut).join(' '));
+  try {
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    await new AsyncFunction('H', 'print', code)(H, print);
+  } catch (e) { log.push('Error: ' + e.message); }
+  out.textContent = log.join('\n') || '(no output)';
+}
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) {
+    const a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0';
+    document.body.append(a); a.select(); try { document.execCommand('copy'); } catch (_) { /* ignore */ } a.remove();
+  }
+  const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = old; }, 1400);
+}
+function codeBox(code, lang = 'Python') {
+  const btn = h('button', { type: 'button', 'aria-label': 'Copy code' }, 'Copy');
+  btn.addEventListener('click', () => copyText(code, btn));
+  return h('div', { class: 'codebox' }, h('div', { class: 'codebar' }, h('span', {}, lang), btn), h('pre', {}, h('code', {}, code)));
+}
+
+// ---------- tab contents
+function missionTab(c) {
+  const chkKey = i => c.id + ':' + i;
+  return h('div', { class: 'prose' },
+    c.prereq ? h('div', { class: 'callout warn' }, h('p', {}, h('b', {}, 'Before you start. '), c.prereq)) : null,
+    h('h3', {}, 'The goal'), c.goal.map(p => h('p', {}, p)),
+    h('h3', {}, 'Why it matters'), c.concept.map(p => h('p', {}, p)),
+    h('p', { class: 'note' }, 'Connects to lecture notes: ' + c.section + '.'),
+    c.tip ? h('p', { class: 'note' }, 'Tip for teachers: ' + c.tip) : null,
+    h('h3', {}, 'What you will build'),
+    h('ul', { class: 'checklist' }, c.build.map((t, i) => {
+      const id = 'chk-' + c.id + '-' + i;
+      const box = h('input', { type: 'checkbox', id });
+      box.checked = !!state.chk[chkKey(i)];
+      box.addEventListener('change', () => { state.chk[chkKey(i)] = box.checked; save(); });
+      return h('li', {}, box, h('label', { for: id }, t));
+    })),
+    h('h3', {}, 'You are done when'), h('p', {}, c.done),
+    h('p', { class: 'note' }, c.url ? 'The official page holds the input data and the expected answers. Open it in another tab and work in any language you like.' : 'This exercise is self-contained. Everything you need is in the workbench.'));
+}
+
+function benchTab(c) {
+  const u = ui[c.id];
+  const wrap = h('div', { class: 'lab' });
+  if (c.lab && LABS[c.lab]) {
+    try { wrap.append(LABS[c.lab]()); }
+    catch (e) { wrap.append(h('pre', { class: 'out err' }, 'This workbench failed to load: ' + e.message)); }
+  } else {
+    wrap.append(h('div', { class: 'callout' }, h('p', {}, h('b', {}, 'No interactive tool for this one. '), 'The oracle or server you need is part of the challenge, so build it in your own editor. The walkthrough tab shows a structure to start from.')));
+  }
+  if (!wrap.querySelector('.lab-part')) wrap.classList.add('card');
+  const area = ta(u.code != null ? u.code : (STARTERS[c.id] || DEFAULT_STARTER), 9, { 'aria-label': 'JavaScript scratchpad' });
+  area.addEventListener('input', () => { u.code = area.value; });
+  const out = outbox(); out.textContent = '';
+  const run = h('button', { class: 'btn primary', type: 'button' }, 'Run');
+  run.addEventListener('click', () => { u.code = area.value; runScratch(area.value, out); });
+  const scratch = canEval
+    ? h('div', { class: 'scratch', style: 'display:grid;gap:10px;margin-top:10px' }, h('p', { class: 'note' }, 'A quick place to try ideas in JavaScript without installing anything. Your code runs only in this page.'), area, h('div', { class: 'row tight' }, run), out)
+    : h('p', { class: 'note', style: 'margin-top:8px' }, 'The JavaScript scratchpad is not available in this view. Use your own editor instead.');
+  wrap.append(h('details', { class: 'more' }, h('summary', {}, 'Scratchpad (JavaScript)'), scratch));
+  return wrap;
+}
+
+function hintsTab(c) {
+  const u = ui[c.id], box = h('div');
+  const draw = () => {
+    box.innerHTML = '';
+    box.append(h('p', { class: 'note', style: 'margin-bottom:12px' }, 'Hints go from gentle to specific. Try for a few minutes between each one.'));
+    c.hints.slice(0, u.hints).forEach((t, i) => box.append(h('div', { class: 'hint' }, h('b', {}, 'Hint ' + (i + 1) + ' of ' + c.hints.length), h('p', {}, t))));
+    if (u.hints < c.hints.length) {
+      box.append(h('button', { class: 'btn', type: 'button', onclick: () => { u.hints++; draw(); } }, u.hints ? 'Show the next hint' : 'Show the first hint'));
+    } else {
+      box.append(h('p', { class: 'note' }, 'That is every hint. Still stuck? The walkthrough tab goes step by step.'));
+    }
+  };
+  draw();
+  return box;
+}
+
+function walkTab(c) {
+  const u = ui[c.id], box = h('div');
+  const draw = () => {
+    box.innerHTML = '';
+    if (u.steps === 0) {
+      box.append(h('div', { class: 'gate' }, h('div', { class: 'callout' }, h('p', {}, h('b', {}, 'Try it yourself first. '), 'You learn the most from the struggle. If you are stuck after a real attempt and the hints, open the walkthrough one step at a time and stop as soon as you can continue alone.'),
+        h('p', {}, 'Code is Python with pycryptodome (pip install pycryptodome). The ideas work in any language.')),
+        h('button', { class: 'btn primary', type: 'button', onclick: () => { u.steps = 1; draw(); } }, 'I am stuck, show the first step')));
+      return;
+    }
+    c.steps.slice(0, u.steps).forEach((s, i) => box.append(h('div', { class: 'step' }, h('div', { class: 'n' }, i + 1), h('div', {}, h('h4', {}, s.t), h('p', {}, s.p), codeBox(s.code)))));
+    if (u.steps < c.steps.length) {
+      box.append(h('button', { class: 'btn primary', type: 'button', onclick: () => { u.steps++; draw(); } }, 'Show step ' + (u.steps + 1) + ' of ' + c.steps.length));
+    } else {
+      box.append(h('div', { class: 'callout' }, h('p', {}, h('b', {}, 'That is the full approach. '), 'Run it on the official input, compare with the expected answer, then answer the check-in questions to make sure the idea stuck.')));
+    }
+  };
+  draw();
+  return box;
+}
+
+function checkTab(c) {
+  const box = h('div');
+  box.append(h('p', { class: 'note', style: 'margin-bottom:12px' }, 'Answer each question in your head or on paper first, then reveal the answer.'));
+  c.check.forEach(q => {
+    const a = h('p', { class: 'a', style: 'display:none' }, q.a);
+    const b = h('button', { class: 'btn small', type: 'button' }, 'Show answer');
+    b.addEventListener('click', () => { const open = a.style.display === 'none'; a.style.display = open ? '' : 'none'; b.textContent = open ? 'Hide answer' : 'Show answer'; });
+    box.append(h('div', { class: 'qa' }, h('p', { class: 'q' }, q.q), b, a));
+  });
+  box.append(doneRow(c));
+  return box;
+}
+
+function doneRow(c) {
+  const b = h('button', { class: 'btn ' + (state.done[c.id] ? '' : 'ok'), type: 'button' }, state.done[c.id] ? 'Marked done (click to undo)' : 'Mark this challenge as done');
+  b.addEventListener('click', () => toggleDone(c.id));
+  return h('div', { class: 'done-row' }, b, h('span', { class: 'note' }, 'Your progress is saved in this browser.'));
+}
+
+// ---------- layout pieces
+function toggleDone(id) { state.done[id] = !state.done[id]; save(); renderAll(); }
+function go(id, jump) {
+  state.cur = id; save();
+  try { history.replaceState(null, '', '#c' + id); } catch (e) { /* ignore */ }
+  renderAll();
+  document.getElementById('nav').classList.remove('open');
+  if (jump || window.innerWidth <= 880) document.getElementById('main').scrollIntoView({ block: 'start' });
+}
+function doneCount() { return C.filter(c => state.done[c.id]).length; }
+
+function renderStrip() {
+  const strip = document.getElementById('strip'); strip.innerHTML = '';
+  C.forEach(c => {
+    const b = h('button', { type: 'button', class: 'cell' + (c.track === 'stretch' ? ' stretch' : '') + (state.done[c.id] ? ' done' : '') + (state.cur === c.id ? ' cur' : ''),
+      'aria-label': (c.id === 0 ? 'Warm-up: ' : 'Challenge ' + c.id + ': ') + c.title + (state.done[c.id] ? ', done' : ''), title: lbl(c) }, c.id);
+    b.addEventListener('click', () => go(c.id, true)); strip.append(b);
+  });
+  document.getElementById('count').textContent = doneCount() + ' of ' + C.length + ' done';
+  document.getElementById('navtoggle').textContent = 'Choose a challenge (' + doneCount() + ' of ' + C.length + ' done)';
+}
+function renderNav() {
+  const nav = document.getElementById('nav'); nav.innerHTML = '';
+  [['core', 'Core track, work through in order'], ['stretch', 'Stretch, for students who want more']].forEach(([track, label]) => {
+    nav.append(h('h2', {}, label));
+    C.filter(c => c.track === track).forEach(c => {
+      const b = h('button', { type: 'button', class: 'nav-item' + (state.cur === c.id ? ' cur' : '') + (state.done[c.id] ? ' done' : ''), 'aria-current': state.cur === c.id ? 'true' : null },
+        h('span', { class: 'dot' }, state.done[c.id] ? '\u2713' : ''), h('span', {}, c.id === 0 ? null : h('span', { class: 'num' }, c.id + '.'), c.title));
+      b.addEventListener('click', () => go(c.id, true)); nav.append(b);
+    });
+  });
+}
+function renderMain() {
+  const c = byId[state.cur], main = document.getElementById('main');
+  ui[c.id] = ui[c.id] || { tab: 'mission', hints: 0, steps: 0 };
+  const u = ui[c.id]; main.innerHTML = '';
+  const idx = C.findIndex(x => x.id === c.id);
+  const link = h('a', { class: 'btn primary', href: c.url, target: '_blank', rel: 'noopener' }, 'Open the official challenge');
+  const done = h('button', { type: 'button', class: 'btn' }, state.done[c.id] ? 'Done (click to undo)' : 'Mark as done');
+  done.addEventListener('click', () => toggleDone(c.id));
+  main.append(
+    h('div', { class: 'ch-head' }, h('h2', {}, lbl(c)),
+      h('ul', { class: 'facts' }, h('li', { class: 'lvl' }, c.level), h('li', {}, c.set ? 'Cryptopals set ' + c.set : 'Warm-up before Cryptopals'), h('li', {}, 'About ' + c.time), h('li', {}, 'Lecture: ' + c.section)),
+      h('div', { class: 'actions' }, c.url ? link : null, done)));
+  const tabs = h('div', { class: 'tabs', role: 'tablist', 'aria-label': 'Challenge sections' });
+  TABS.forEach(([k, label]) => {
+    const t = h('button', { type: 'button', class: 'tab', role: 'tab', id: 'tab-' + k, 'aria-selected': u.tab === k ? 'true' : 'false', 'aria-controls': 'panel' }, label);
+    t.addEventListener('click', () => { u.tab = k; renderMain(); }); tabs.append(t);
+  });
+  const fn = { mission: missionTab, bench: benchTab, hints: hintsTab, walk: walkTab, check: checkTab }[u.tab];
+  const panel = h('div', { id: 'panel', role: 'tabpanel', 'aria-labelledby': 'tab-' + u.tab });
+  panel.append(fn(c));
+  const prev = C[idx - 1], next = C[idx + 1];
+  const pager = h('div', { class: 'done-row' },
+    prev ? h('button', { type: 'button', class: 'btn', onclick: () => go(prev.id, true) }, 'Previous: ' + lbl(prev)) : null,
+    next ? h('button', { type: 'button', class: 'btn', onclick: () => go(next.id, true) }, 'Next: ' + lbl(next)) : null);
+  main.append(tabs, panel, pager);
+}
+function renderAll() { renderStrip(); renderNav(); renderMain(); }
+
+(function init() {
+  const m = /^#c(\d+)$/.exec(location.hash || '');
+  if (m && byId[+m[1]]) state.cur = +m[1];
+  if (!byId[state.cur]) state.cur = 1;
+  document.getElementById('navtoggle').addEventListener('click', () => document.getElementById('nav').classList.toggle('open'));
+  renderAll();
+})();
+//#app-end
+</script>
+</body>
+</html>
